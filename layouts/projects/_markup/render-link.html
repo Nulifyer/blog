@@ -1,0 +1,7 @@
+{{- $dest := .Destination -}}
+{{- $u := urls.Parse $dest -}}
+{{- if and .Page.Params.repo_url (not $u.IsAbs) (not (hasPrefix $dest "#")) $u.Path -}}
+  {{- $dest = printf "%s/blob/%s/%s" .Page.Params.repo_url .Page.Params.default_branch (strings.TrimLeft "./" $dest) -}}
+{{- end -}}
+<a href="{{ $dest | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text }}</a>
+{{- /**/ -}}

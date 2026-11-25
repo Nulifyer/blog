@@ -1,0 +1,7 @@
+{{- $src := .Destination -}}
+{{- $u := urls.Parse $src -}}
+{{- if and .Page.Params.full_name (not $u.IsAbs) -}}
+  {{- $src = printf "https://raw.githubusercontent.com/%s/%s/%s" .Page.Params.full_name .Page.Params.default_branch (strings.TrimLeft "./" $src) -}}
+{{- end -}}
+<img src="{{ $src | safeURL }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy">
+{{- /**/ -}}

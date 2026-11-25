@@ -1,0 +1,28 @@
+{{- define "main" }}
+<article class="post-single">
+  <header class="post-header">
+    {{ partial "breadcrumbs.html" . }}
+    <h1 class="post-title">{{ .Title }}</h1>
+    {{- with .Params.description }}
+    <div class="post-description">{{ . }}</div>
+    {{- end }}
+    <div class="post-meta">
+      {{- with .Params.language }}<span>{{ . }}</span>&nbsp;·&nbsp;{{ end -}}
+      <span>{{ .Params.stars }} {{ cond (eq .Params.stars 1) "star" "stars" }}</span>&nbsp;·&nbsp;
+      <span>Updated {{ .Lastmod | time.Format ":date_medium" }}</span>&nbsp;·&nbsp;
+      <a href="{{ .Params.repo_url }}">View on GitHub</a>
+      {{- with .Params.homepage }}&nbsp;·&nbsp;<a href="{{ . }}">Website</a>{{ end }}
+    </div>
+  </header>
+  <div class="post-content md-content">
+    {{- partial "anchored_headings.html" .Content -}}
+  </div>
+  <footer class="post-footer">
+    <ul class="post-tags">
+      {{- range .GetTerms "tags" }}
+      <li><a href="{{ .Permalink }}">{{ .LinkTitle }}</a></li>
+      {{- end }}
+    </ul>
+  </footer>
+</article>
+{{- end }}

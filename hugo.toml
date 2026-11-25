@@ -1,0 +1,66 @@
+# Production URL comes from the workflow's --baseURL; this value is for local previews.
+baseURL = "https://blog.swarm.nulteck.com/"
+title = "nulifyer"
+theme = "PaperMod"
+enableRobotsTXT = true
+enableGitInfo = false
+
+[pagination]
+  pagerSize = 10
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+
+[markup.goldmark.renderer]
+  unsafe = true   # project READMEs often contain raw HTML
+
+[caches.getresource]
+  maxAge = "10m"  # keeps local rebuilds from hammering the GitHub API
+
+[params]
+  env = "production"
+  description = "Posts and projects by nulifyer"
+  mainSections = ["posts"]
+  defaultTheme = "auto"
+  ShowBreadCrumbs = true
+  ShowReadingTime = true
+  ShowPostNavLinks = true
+  ShowCodeCopyButtons = true
+  ShowToc = true
+  TocOpen = false
+
+  [params.github]
+    user = "nulifyer"
+
+  [params.homeInfoParams]
+    Title = "Hi, I'm nulifyer"
+    Content = "Write-ups on the things I build. The [projects](/projects/) page is generated from my public GitHub repos."
+
+  [[params.socialIcons]]
+    name = "github"
+    url = "https://github.com/nulifyer"
+  [[params.socialIcons]]
+    name = "rss"
+    url = "/index.xml"
+
+[menu]
+  [[menu.main]]
+    name = "Posts"
+    url = "/posts/"
+    weight = 10
+  [[menu.main]]
+    name = "Projects"
+    url = "/projects/"
+    weight = 20
+  [[menu.main]]
+    name = "Archive"
+    url = "/archives/"
+    weight = 30
+  [[menu.main]]
+    name = "Tags"
+    url = "/tags/"
+    weight = 40
+  [[menu.main]]
+    name = "Search"
+    url = "/search/"
+    weight = 50

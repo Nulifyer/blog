@@ -1,0 +1,71 @@
+{{- /*
+  Content adapter: one page per public GitHub repo, with the repo's README as the page body.
+  Runs at build time. HUGO_GITHUB_TOKEN (optional) raises the API rate limit.
+*/ -}}
+{{- $user := site.Params.github.user -}}
+{{- $cfg := hugo.Data.projects | default dict -}}
+{{- $hide := $cfg.hide | default slice -}}
+{{- $featured := $cfg.featured | default slice -}}
+
+{{- $headers := dict "Accept" "application/vnd.github+json" "X-GitHub-Api-Version" "2022-11-28" -}}
+{{- with os.Getenv "HUGO_GITHUB_TOKEN" -}}
+  {{- $headers = merge $headers (dict "Authorization" (printf "Bearer %s" .)) -}}
+{{- end -}}
+
+{{- $listURL := printf "https://api.github.com/users/%s/repos?type=owner&per_page=100&sort=pushed" $user -}}
+{{- $repos := slice -}}
+{{- with try (resources.GetRemote $listURL (dict "headers" $headers)) -}}
+  {{- with .Err -}}
+    {{- errorf "projects: could not list GitHub repos: %s" . -}}
+  {{- else with .Value -}}
+    {{- $repos = . | transform.Unmarshal -}}
+  {{- end -}}
+{{- end -}}
+
+{{- range $repos -}}
+  {{- if or .fork .archived .private (in $hide .name) -}}{{- continue -}}{{- end -}}
+
+  {{- $repo := . -}}
+  {{- $raw := printf "https://raw.githubusercontent.com/%s/%s/" .full_name .default_branch -}}
+
+  {{- $readme := "" -}}
+  {{- $readmeURL := printf "https://api.github.com/repos/%s/readme" .full_name -}}
+  {{- with try (resources.GetRemote $readmeURL (dict "headers" $headers)) -}}
+    {{- with .Err -}}
+      {{- if not (strings.Contains . "404") -}}{{- warnf "projects: README for %s: %s" $repo.name . -}}{{- end -}}
+    {{- else with .Value -}}
+      {{- with (. | transform.Unmarshal).content -}}{{- $readme = replace . "\n" "" | base64Decode -}}{{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- /* The page already shows the repo name as its title. */ -}}
+  {{- $readme = replaceRE `\A\s*#[ \t]+[^\n]*\n` "" $readme 1 -}}
+  {{- /* Raw HTML <img src="relative"> bypasses render hooks, so point it at the repo here. */ -}}
+  {{- $readme = replaceRE `(<img[^>]*?\ssrc=")(?:\./|/)?([^":#]+")` (printf "${1}%s${2}" $raw) $readme -}}
+  {{- if not $readme -}}
+    {{- $readme = printf "This repository has no README yet. [Browse it on GitHub](%s)." .html_url -}}
+  {{- end -}}
+
+  {{- $rank := 0 -}}
+  {{- range $i, $name := $featured -}}
+    {{- if eq $name $repo.name -}}{{- $rank = add $i 1 -}}{{- end -}}
+  {{- end -}}
+
+  {{- $.AddPage (dict
+    "kind" "page"
+    "path" (lower .name)
+    "title" .name
+    "dates" (dict "date" (time.AsTime .created_at) "lastmod" (time.AsTime .pushed_at))
+    "params" (dict
+      "description" (.description | default "")
+      "repo_url" .html_url
+      "full_name" .full_name
+      "default_branch" .default_branch
+      "homepage" (.homepage | default "")
+      "language" (.language | default "")
+      "stars" .stargazers_count
+      "tags" (.topics | default slice)
+      "featured_rank" $rank
+    )
+    "content" (dict "mediaType" "text/markdown" "value" $readme)
+  ) -}}
+{{- end -}}

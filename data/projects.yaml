@@ -1,0 +1,9 @@
+# The Projects page lists every public, non-fork, non-archived repo automatically.
+# Pin repos to the top, in this order:
+featured:
+  - guget
+  - sqlgo
+# Leave these repos off the site:
+hide:
+  - blog
+  - nulifyer
