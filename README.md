@@ -1,7 +1,7 @@
 # blog
 
-Source for my profile site and blog: a [Hugo](https://gohugo.io) site with the
-[PaperMod](https://github.com/adityatelange/hugo-PaperMod) theme.
+Source for my profile site and blog: a [Hugo](https://gohugo.io) site with its own theme,
+[`themes/buffer`](themes/buffer/README.md) (editor-inspired, Gruvbox light and dark).
 
 ## How publishing works
 
@@ -31,22 +31,24 @@ content/posts/my-new-post/
 ---
 title: "My new post"
 date: 2026-11-25
-description: "One line shown in lists and link previews."
+description: "One line shown under the title, in lists and in link previews."
 draft: false
 ---
 
 Post body in Markdown.
 ```
 
-Posts with `draft: true` aren't published. A post dated in the future appears once a
-build runs after that date.
+Posts with `draft: true` aren't published, and a post dated in the future appears once a build runs
+after that date. GitHub-style alerts (`> [!NOTE]`) and titled code blocks
+(```` ```go {title="main.go"} ````) are supported; see the [theme README](themes/buffer/README.md).
 
 ## GitHub data
 
 The Projects page and the contribution graph read public GitHub data at build time, with no
 token: the public API for repos, stars and READMEs, and the public profile and contributions
-pages for pinned repos and the graph. GitHub allows 60 unauthenticated API requests an hour;
-a build uses about eight, and responses are cached for ten minutes.
+pages for pinned repos and the graph, and raw files for READMEs. A build makes two GitHub API
+requests (GitHub allows 60 an hour without a token), and responses are cached for ten minutes.
+If any of these fetches fails, the build fails and the previous complete build keeps serving.
 
 ## Projects page
 
@@ -67,12 +69,10 @@ the pinned projects.
 ## Local preview
 
 ```sh
-git submodule update --init
-podman run --rm -it -p 1313:1313 -v "$PWD:/project:z" -e HUGO_GITHUB_TOKEN="$(gh auth token)" \
-  ghcr.io/gohugoio/hugo:v0.170.1 server --bind 0.0.0.0
+podman run --rm -it -p 1313:1313 -v "$PWD:/project:z" ghcr.io/gohugoio/hugo:v0.170.1 server --bind 0.0.0.0
 ```
 
-Then open http://localhost:1313. The token is optional.
+Then open http://localhost:1313.
 
 ## Changing the domain
 

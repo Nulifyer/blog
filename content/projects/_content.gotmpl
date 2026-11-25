@@ -1,8 +1,10 @@
 {{- /*
   Content adapter: one page per repo you own and have pinned on your GitHub profile or starred.
   Each page uses the repo's README as its body. Runs at build time.
-  No token needed. HUGO_GITHUB_TOKEN (optional) raises GitHub's API limit from 60 to 5,000 requests
-  an hour; a build makes about eight.
+  No token needed: a build makes two GitHub API requests (repo list, stars); READMEs come from
+  raw.githubusercontent.com and pins from the public profile page. HUGO_GITHUB_TOKEN (optional)
+  raises the API limit from 60 to 5,000 requests an hour. A failed fetch stops the build, so the
+  previous complete build keeps serving instead of a partial one.
 */ -}}
 {{- $user := site.Params.github.user -}}
 {{- $cfg := hugo.Data.projects | default dict -}}
@@ -18,7 +20,7 @@
 {{- $profileURL := printf "https://github.com/%s" $user -}}
 {{- with try (resources.GetRemote $profileURL (dict "headers" (dict "User-Agent" "blog-builder (Hugo)"))) -}}
   {{- with .Err -}}
-    {{- warnf "projects: could not read pinned repos from %s: %s" $profileURL . -}}
+    {{- errorf "projects: could not read pinned repos from %s: %s" $profileURL . -}}
   {{- else with .Value -}}
     {{- range findRESubmatch (printf `(?i)href="/%s/([^"/]+)"[^>]*>\s*<span class="repo"` $user) .Content -}}
       {{- $pinned = $pinned | append (index . 1) -}}
@@ -60,13 +62,15 @@
   {{- $repo := . -}}
   {{- $raw := printf "https://raw.githubusercontent.com/%s/%s/" .full_name .default_branch -}}
 
+  {{- /* README from raw.githubusercontent.com (not counted against the API rate limit).
+         A missing file is fine; any other failure stops the build so the last good build keeps serving. */ -}}
   {{- $readme := "" -}}
-  {{- $readmeURL := printf "https://api.github.com/repos/%s/readme" .full_name -}}
-  {{- with try (resources.GetRemote $readmeURL (dict "headers" $headers)) -}}
-    {{- with .Err -}}
-      {{- if not (strings.Contains . "404") -}}{{- warnf "projects: README for %s: %s" $repo.name . -}}{{- end -}}
-    {{- else with .Value -}}
-      {{- with (. | transform.Unmarshal).content -}}{{- $readme = replace . "\n" "" | base64Decode -}}{{- end -}}
+  {{- range slice "README.md" "readme.md" "Readme.md" "README.markdown" "README" -}}
+    {{- if not $readme -}}
+      {{- with try (resources.GetRemote (printf "%s%s" $raw .)) -}}
+        {{- with .Err -}}{{- errorf "projects: could not fetch the README for %s: %s" $repo.name . -}}
+        {{- else with .Value -}}{{- $readme = .Content -}}{{- end -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
   {{- /* Icon: an override in data/projects.yaml, else the first README image whose alt text or

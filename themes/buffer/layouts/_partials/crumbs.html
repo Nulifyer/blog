@@ -1,0 +1,1 @@
+<nav class="crumbs" aria-label="Breadcrumb"><a href="{{ "" | relURL }}">~</a>/{{ with .Parent }}{{ if not .IsHome }}<a href="{{ .RelPermalink }}">{{ .Section }}</a>/{{ end }}{{ end }}<span aria-current="page">{{ path.Base (strings.TrimSuffix "/" .RelPermalink) }}</span></nav>

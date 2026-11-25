@@ -1,0 +1,11 @@
+{{- $index := slice -}}
+{{- range site.RegularPages -}}
+  {{- if not .Params.searchHidden -}}
+    {{- $item := dict "title" .Title "kind" (cond (eq .Section "projects") "Project" "Post") "url" .RelPermalink
+        "description" (.Params.description | default (.Summary | plainify) | htmlUnescape | truncate 160)
+        "keywords" (delimit (.Params.topics | default slice | append (.Params.language | default "")) " ")
+        "body" (.Plain | htmlUnescape | truncate 3000) -}}
+    {{- $index = $index | append $item -}}
+  {{- end -}}
+{{- end -}}
+{{- $index | jsonify -}}

@@ -1,0 +1,22 @@
+<header class="hd"><div class="wrap hd-in">
+<a class="brand" href="{{ "" | relURL }}" aria-label="{{ site.Title }}, home"><span class="pr">~/</span>{{ site.Title }}<span class="cur" aria-hidden="true"></span></a>
+<nav class="tabs" aria-label="Main">
+{{- range site.Menus.main }}
+  {{- $current := or (eq $.RelPermalink .URL) (and $.Section (eq (printf "/%s/" $.Section) .URL)) }}
+  <a href="{{ .URL | relURL }}"{{ if $current }} aria-current="page"{{ end }}>{{ with .Params.icon }}{{ partial "icon.html" . }}{{ end }}{{ .Name }}</a>
+{{- end }}
+</nav>
+<div class="hd-tools">
+{{- with site.Home.OutputFormats.Get "json" }}
+<div class="search" role="search" data-search data-index="{{ .RelPermalink }}" hidden>
+<label class="vh" for="q">Search posts and projects</label>{{ partial "icon.html" (dict "name" "search" "class" "s-ic") }}
+<input id="q" type="search" placeholder="search" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="q-list">
+<kbd aria-hidden="true">/</kbd>
+<div class="search-panel" hidden><ul id="q-list" role="listbox" aria-label="Suggestions"></ul><p class="search-msg" hidden></p>
+<div class="s-keys" aria-hidden="true"><span><kbd>&uarr;&darr;</kbd> move</span><span><kbd>enter</kbd> open</span><span><kbd>esc</kbd> close</span></div></div>
+<p class="vh" aria-live="polite"></p>
+</div>
+{{- end }}
+<button type="button" class="theme-toggle" aria-label="Switch theme" title="Switch theme">{{ partial "icon.html" "moon" }}{{ partial "icon.html" "sun" }}</button>
+</div>
+</div></header>

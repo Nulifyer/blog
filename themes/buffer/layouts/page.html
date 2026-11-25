@@ -1,0 +1,22 @@
+{{- define "main" }}
+<article class="post">
+{{ partial "crumbs.html" . }}
+<h1>{{ .Title }}</h1>
+{{- with .Description }}<p class="lead">{{ . }}</p>{{ end }}
+<ul class="meta">
+<li>{{ partial "icon.html" "calendar" }}<time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time></li>
+{{- if ne (.Lastmod.Format "2006-01-02") (.Date.Format "2006-01-02") }}<li>{{ partial "icon.html" "history" }}updated <time datetime="{{ .Lastmod.Format "2006-01-02" }}">{{ .Lastmod.Format "2006-01-02" }}</time></li>{{ end }}
+<li>{{ partial "icon.html" "clock" }}{{ .ReadingTime }} min read</li>
+</ul>
+<div class="prose">{{ .Content }}</div>
+{{- if and .IsPage (eq .Section "posts") }}
+{{- $newer := .NextInSection }}{{ $older := .PrevInSection }}
+{{- if or $newer $older }}
+<nav class="post-nav" aria-label="More posts">
+{{- with $older }}<a href="{{ .RelPermalink }}"><span class="pn-k">{{ partial "icon.html" "arrow-left" }}older</span><span class="pn-t">{{ .Title }}</span></a>{{ end }}
+{{- with $newer }}<a class="next" href="{{ .RelPermalink }}"><span class="pn-k">newer{{ partial "icon.html" "arrow-right" }}</span><span class="pn-t">{{ .Title }}</span></a>{{ end }}
+</nav>
+{{- end }}
+{{- end }}
+</article>
+{{- end }}

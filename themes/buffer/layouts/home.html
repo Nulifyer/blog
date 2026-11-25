@@ -1,0 +1,37 @@
+{{- define "main" }}
+{{- $projects := site.GetPage "/projects" }}
+{{- $pinned := slice }}{{ with $projects }}{{ $pinned = sort (where .RegularPages "Params.pinned_rank" "gt" 0) "Params.pinned_rank" }}{{ end }}
+{{- $posts := where site.RegularPages "Section" "in" site.Params.mainSections }}
+
+<section class="who" aria-labelledby="h-name">
+{{- with partial "avatar.html" 144 }}
+<img class="avatar" src="{{ (.Process "webp").RelPermalink }}" width="72" height="72" alt="">
+{{- end }}
+<div><h1 id="h-name">{{ site.Title }}</h1>{{ with site.Params.intro }}<p>{{ . }}</p>{{ end }}
+<ul class="meta">
+{{- range site.Params.social }}<li><a href="{{ .url }}">{{ with .icon }}{{ partial "icon.html" . }}{{ end }}{{ .label | default .name }}</a></li>{{ end }}
+{{- with site.Home.OutputFormats.Get "rss" }}<li><a href="{{ .RelPermalink }}">{{ partial "icon.html" "rss" }}rss</a></li>{{ end }}
+</ul></div>
+</section>
+
+{{- partialCached "contributions.html" . }}
+
+<div class="split">
+<section class="pane" aria-labelledby="h-posts">
+<div class="pane-hd"><h2 id="h-posts">{{ partial "icon.html" "file-text" }}Recent posts</h2>{{ if gt (len $posts) 5 }}<a href="{{ "posts/" | relURL }}">all posts</a>{{ end }}</div>
+{{- with first 5 $posts }}
+<ul class="rows">{{ range . }}{{ partial "post-row.html" . }}{{ end }}</ul>
+{{- else }}
+<p class="pane-empty">No posts yet.</p>
+{{- end }}
+</section>
+<section class="pane" aria-labelledby="h-pinned">
+<div class="pane-hd"><h2 id="h-pinned">{{ partial "icon.html" "pin" }}Pinned projects</h2>{{ with $projects }}<a href="{{ .RelPermalink }}">all {{ len .RegularPages }} projects{{ partial "icon.html" "arrow-right" }}</a>{{ end }}</div>
+{{- with $pinned }}
+<ul class="rows">{{ range . }}{{ partial "project-row.html" . }}{{ end }}</ul>
+{{- else }}
+<p class="pane-empty">Nothing pinned yet. Pin repositories on GitHub to list them here.</p>
+{{- end }}
+</section>
+</div>
+{{- end }}

@@ -1,0 +1,26 @@
+{{- /* dict "page" P "size" N: the repo's icon (fetched and resized at build time) or a two-letter monogram
+       tinted by language. */ -}}
+{{- $p := .page -}}{{- $size := .size | default 24 -}}
+{{- $src := "" -}}
+{{- with $p.Params.icon_url -}}
+  {{- with try (resources.GetRemote .) -}}
+    {{- with .Err -}}{{- warnf "project icon for %s: %s" $p.Title . -}}
+    {{- else with .Value -}}
+      {{- if eq .MediaType.SubType "svg" -}}{{- $src = .RelPermalink -}}
+      {{- else if in (slice "png" "jpeg" "webp" "gif") .MediaType.SubType -}}
+        {{- $px := mul $size 2 -}}{{- $src = (.Fit (printf "%dx%d png" $px $px)).RelPermalink -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $hue := index hugo.Data.languages ($p.Params.language | default "") | default "" -}}
+{{- if $src -}}
+<span class="p-icon has-img" style="--size:{{ $size }}px"><img src="{{ $src }}" width="{{ $size }}" height="{{ $size }}" alt="" loading="lazy" decoding="async"></span>
+{{- else -}}
+  {{- $n := strings.TrimLeft "." $p.Title -}}
+  {{- $parts := findRE `[A-Z]?[a-z0-9]+|[A-Z]+` $n -}}
+  {{- $m := "" -}}
+  {{- if ge (len $parts) 2 }}{{ $m = upper (printf "%s%s" (substr (index $parts 0) 0 1) (substr (index $parts 1) 0 1)) }}
+  {{- else }}{{ $m = printf "%s%s" (upper (substr $n 0 1)) (substr $n 1 1) }}{{ end -}}
+<span class="p-icon mono{{ with $hue }} lang-{{ . }}{{ end }}" style="--size:{{ $size }}px" aria-hidden="true">{{ $m }}</span>
+{{- end -}}

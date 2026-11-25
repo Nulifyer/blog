@@ -1,0 +1,24 @@
+{{- /* JSON-LD: Person + WebSite on the home page, BlogPosting on posts, SoftwareSourceCode on projects. */ -}}
+{{- $person := dict "@type" "Person" "name" (site.Params.author | default site.Title) "url" site.Home.Permalink -}}
+{{- with site.Params.social }}{{ $person = merge $person (dict "sameAs" (apply . "index" "." "url")) }}{{ end -}}
+{{- with partial "avatar.html" 512 }}{{ $person = merge $person (dict "image" .Permalink) }}{{ end -}}
+{{- $data := dict -}}
+{{- if .IsHome -}}
+  {{- $data = dict "@context" "https://schema.org" "@graph" (slice
+      (merge $person (dict "@id" (printf "%s#person" site.Home.Permalink) "description" site.Params.description))
+      (dict "@type" "WebSite" "name" site.Title "url" site.Home.Permalink "author" (dict "@id" (printf "%s#person" site.Home.Permalink)))) -}}
+{{- else if and .IsPage (eq .Section "posts") -}}
+  {{- $data = dict "@context" "https://schema.org" "@type" "BlogPosting" "headline" .Title "url" .Permalink
+      "mainEntityOfPage" .Permalink "datePublished" (.Date.Format "2006-01-02T15:04:05Z07:00")
+      "dateModified" (.Lastmod.Format "2006-01-02T15:04:05Z07:00") "author" $person
+      "description" (partial "description.html" .) -}}
+  {{- with partialCached "og-card.html" . .RelPermalink }}{{ $data = merge $data (dict "image" .Permalink) }}{{ end -}}
+{{- else if and .IsPage (eq .Section "projects") -}}
+  {{- $data = dict "@context" "https://schema.org" "@type" "SoftwareSourceCode" "name" .Title "url" .Permalink
+      "codeRepository" .Params.repo_url "author" $person "description" (partial "description.html" .)
+      "dateModified" (.Lastmod.Format "2006-01-02T15:04:05Z07:00") -}}
+  {{- with .Params.language }}{{ $data = merge $data (dict "programmingLanguage" .) }}{{ end -}}
+{{- end -}}
+{{- with $data }}
+<script type="application/ld+json">{{ . | jsonify | safeJS }}</script>
+{{- end -}}

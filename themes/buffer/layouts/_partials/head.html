@@ -1,0 +1,37 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+{{- /* Pick the theme before CSS paints: stored choice, else the OS preference. */}}
+<script>(function(){var t;try{t=localStorage.getItem("pref-theme")}catch(e){}document.documentElement.dataset.theme=t||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")})()</script>
+<title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }} · {{ site.Title }}{{ end }}</title>
+{{- $desc := partial "description.html" . }}
+<meta name="description" content="{{ $desc }}">
+<meta name="author" content="{{ site.Params.author | default site.Title }}">
+<meta name="robots" content="{{ if or (eq .Kind "404") .Params.noindex }}noindex{{ else }}index, follow{{ end }}">
+<link rel="canonical" href="{{ .Permalink }}">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f2e5bc" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#2a2827" media="(prefers-color-scheme: dark)">
+
+{{- /* Fonts used above the fold */}}
+{{- range slice "hack-400" "fira-sans-400" }}
+<link rel="preload" href="{{ (resources.Get (printf "fonts/%s.woff2" .) | fingerprint).RelPermalink }}" as="font" type="font/woff2" crossorigin>
+{{- end }}
+
+{{- $css := slice (resources.Get "css/main.css" | resources.ExecuteAsTemplate "css/main.css" .) (resources.Get "css/chroma.css") | resources.Concat "css/site.css" | minify | fingerprint }}
+<link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
+{{- $js := resources.Get "js/site.js" | js.Build (dict "minify" true "target" "es2020") | fingerprint }}
+<script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" defer></script>
+
+<link rel="icon" href="{{ "favicon.ico" | relURL }}" sizes="48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ "favicon-32x32.png" | relURL }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ "favicon-16x16.png" | relURL }}">
+<link rel="apple-touch-icon" href="{{ "apple-touch-icon.png" | relURL }}">
+<link rel="manifest" href="{{ "site.webmanifest" | relURL }}">
+{{- with site.Home.OutputFormats.Get "rss" }}
+<link rel="alternate" type="application/rss+xml" href="{{ .Permalink }}" title="{{ site.Title }}">
+{{- end }}
+{{- range site.Params.social }}
+<link rel="me" href="{{ .url }}">
+{{- end }}
+{{- partial "social-meta.html" (dict "page" . "description" $desc) }}
+{{- partial "schema.html" . }}

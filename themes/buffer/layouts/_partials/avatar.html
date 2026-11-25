@@ -1,0 +1,4 @@
+{{- /* Square avatar of the given size (px), cropped from site.Params.avatar (an asset path). */ -}}
+{{- $out := false -}}
+{{- with site.Params.avatar }}{{ with resources.Get . }}{{ $out = .Fill (printf "%dx%d Center" $ $) }}{{ end }}{{ end -}}
+{{- return $out -}}

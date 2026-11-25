@@ -1,0 +1,3 @@
+<li class="proj-row">{{ partial "project-icon.html" (dict "page" . "size" 24) }}<a class="n t-link" href="{{ .RelPermalink }}">{{ .Title }}</a>
+<span class="meta">{{ partial "lang.html" . }}{{ partial "stars.html" . }}</span>
+{{- with .Params.description }}<p>{{ . }}</p>{{ end }}</li>

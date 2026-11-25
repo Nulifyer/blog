@@ -97,6 +97,7 @@ configs:
         else
           git -C "$$SRC" fetch --quiet --depth 1 origin "$$GIT_BRANCH" &&
           git -C "$$SRC" reset --quiet --hard FETCH_HEAD &&
+          git -C "$$SRC" clean -ffdq &&
           git -C "$$SRC" submodule update --quiet --init --recursive --depth 1
         fi
       }
@@ -158,15 +159,15 @@ configs:
           try_files $$uri $$uri/ =404;
         }
 
-        # Fingerprinted CSS/JS and Hugo-processed images never change under the same name.
-        location ~* "(\.[0-9a-f]{32,}\.(css|js)|_hu_[0-9a-f]+\.[a-z0-9]+)$$" {
+        # Fingerprinted CSS/JS/fonts and Hugo-processed images never change under the same name.
+        location ~* "(\.[0-9a-f]{32,}\.(css|js|woff2)|_hu_[0-9a-f]+\.[a-z0-9]+)$$" {
           include /etc/nginx/snippets/headers.conf;
           add_header Cache-Control "public, max-age=31536000, immutable" always;
         }
 
         location ~* \.(png|jpe?g|gif|webp|svg|ico|woff2?|ttf)$$ {
           include /etc/nginx/snippets/headers.conf;
-          add_header Cache-Control "public, max-age=86400" always;
+          add_header Cache-Control "public, max-age=2592000" always;
         }
 
         location ~* \.webmanifest$$ {

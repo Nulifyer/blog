@@ -1,0 +1,10 @@
+{{- /* Code blocks as editor panes: file/language tab, copy button, line numbers for multi-line code.
+       Use ```lang {title="path/to/file"} to name the tab. */ -}}
+{{- $result := transform.HighlightCodeBlock . -}}
+{{- $lines := len (split (strings.TrimRight "\n" .Inner) "\n") -}}
+{{- $label := .Attributes.title | default .Type | default "text" -}}
+<figure class="code{{ if gt $lines 1 }} numbered{{ end }}">
+<div class="code-hd"><span>{{ partial "icon.html" "file-text" }}{{ $label }}</span><button type="button" class="copy">{{ partial "icon.html" "copy" }}<span>Copy</span></button></div>
+{{ $result.Wrapped }}
+</figure>
+{{- /**/ -}}

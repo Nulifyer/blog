@@ -1,0 +1,21 @@
+# GitHub language -> palette hue (used for the language mark and project monograms).
+C#: purple
+F#: purple
+Go: aqua
+Kotlin: orange
+Java: orange
+Rust: orange
+Zig: orange
+TypeScript: blue
+JavaScript: yellow
+Python: blue
+Shell: green
+PowerShell: blue
+Lua: blue
+QML: green
+C: blue
+C++: red
+HTML: red
+CSS: purple
+Odin: aqua
+Nix: blue

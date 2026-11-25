@@ -1,0 +1,4 @@
+{{- with .Params.language -}}
+{{- $hue := index hugo.Data.languages . | default "" -}}
+<span class="lang{{ with $hue }} lang-{{ . }}{{ end }}">{{ partial "icon.html" "code" }}{{ . }}</span>
+{{- end -}}

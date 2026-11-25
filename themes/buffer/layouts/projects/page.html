@@ -1,0 +1,20 @@
+{{- define "main" }}
+<article class="post">
+{{ partial "crumbs.html" . }}
+<div class="post-title-row">{{ partial "project-icon.html" (dict "page" . "size" 48) }}<h1>{{ .Title }}</h1></div>
+{{- with .Params.description }}<p class="lead">{{ . }}</p>{{ end }}
+<ul class="meta">
+{{- with .Params.language }}<li>{{ partial "lang.html" $ }}</li>{{ end }}
+<li>{{ partial "stars.html" . }}</li>
+<li>{{ partial "icon.html" "history" }}updated <time datetime="{{ .Lastmod.Format "2006-01-02" }}">{{ .Lastmod.Format "2006-01-02" }}</time></li>
+{{- with .Params.repo_url }}<li><a href="{{ . }}">{{ partial "icon.html" "github" }}view on github</a></li>{{ end }}
+{{- with .Params.homepage }}<li><a href="{{ . }}">{{ partial "icon.html" "globe" }}website</a></li>{{ end }}
+</ul>
+{{- /* The page title is the only h1: if the README has its own h1, shift its headings down a level. */}}
+{{- $content := .Content }}
+{{- if findRE `<h1[\s>]` $content 1 }}
+{{- range seq 5 1 }}{{ $content = replaceRE (printf `<(/?)h%d([\s>])` .) (printf `<${1}h%d${2}` (add . 1)) $content }}{{ end }}
+{{- end }}
+<div class="prose">{{ $content | safeHTML }}</div>
+</article>
+{{- end }}

@@ -1,0 +1,19 @@
+{{- define "main" }}
+{{- $pages := .RegularPages.ByDate.Reverse }}
+<header class="page-hd"><h1>{{ .Title }}</h1><span class="count" aria-label="{{ len $pages }} {{ lower .Title }}">{{ len $pages }}</span></header>
+{{- with .Content }}<div class="prose">{{ . }}</div>{{ end }}
+<section class="pane" aria-label="{{ .Title }}">
+{{- $pager := .Paginate $pages }}
+{{- with $pager.Pages }}
+<ul class="rows">{{ range . }}{{ partial "post-row.html" . }}{{ end }}</ul>
+{{- else }}
+<p class="pane-empty">Nothing here yet.</p>
+{{- end }}
+</section>
+{{- if gt $pager.TotalPages 1 }}
+<nav class="pager" aria-label="Pages">
+<span>{{ with $pager.Prev }}<a href="{{ .URL }}">{{ partial "icon.html" "arrow-left" }}newer</a>{{ end }}</span>
+<span>{{ with $pager.Next }}<a href="{{ .URL }}">older{{ partial "icon.html" "arrow-right" }}</a>{{ end }}</span>
+</nav>
+{{- end }}
+{{- end }}

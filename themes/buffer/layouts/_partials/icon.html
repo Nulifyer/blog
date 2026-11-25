@@ -1,0 +1,5 @@
+{{- /* partial "icon.html" "star"  or  partial "icon.html" (dict "name" "search" "class" "s-ic") */ -}}
+{{- $name := . -}}{{- $class := "" -}}
+{{- if reflect.IsMap . }}{{ $name = .name }}{{ $class = .class | default "" }}{{ end -}}
+<svg class="ic i-{{ $name }}{{ with $class }} {{ . }}{{ end }}" aria-hidden="true" focusable="false"><use href="#i-{{ $name }}"/></svg>
+{{- /**/ -}}

@@ -1,0 +1,13 @@
+{{- /* GitHub-style alerts: > [!NOTE], [!TIP], [!IMPORTANT], [!WARNING], [!CAUTION]. */ -}}
+{{- if eq .Type "alert" -}}
+{{- $icons := dict "note" "info" "tip" "lightbulb" "important" "message-warning" "warning" "triangle-alert" "caution" "octagon-alert" -}}
+{{- $t := lower .AlertType -}}
+<div class="alert alert-{{ $t }}" role="note">
+<p class="alert-t">{{ partial "icon.html" (index $icons $t | default "info") }}{{ .AlertTitle | default (title $t) }}</p>
+{{ .Text }}
+</div>
+{{- else -}}
+<blockquote>
+{{ .Text }}
+</blockquote>
+{{- end -}}

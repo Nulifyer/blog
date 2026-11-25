@@ -1,0 +1,67 @@
+{{- /* GitHub contribution calendar, read at build time from the public calendar page (no token needed). */ -}}
+{{- $user := site.Params.github.user -}}
+{{- $url := printf "https://github.com/users/%s/contributions" $user -}}
+{{- $html := "" -}}
+{{- with try (resources.GetRemote $url (dict "headers" (dict "User-Agent" "blog-builder (Hugo)"))) -}}
+  {{- with .Err -}}{{- errorf "contributions: could not read %s: %s" $url . -}}
+  {{- else with .Value -}}{{- $html = .Content -}}{{- end -}}
+{{- end -}}
+
+{{- /* Day counts come from the tooltips: for="contribution-day-component-ROW-COL" ... "3 contributions on ..." */ -}}
+{{- $counts := dict -}}
+{{- range findRESubmatch `for="(contribution-day-component-\d+-\d+)"[^>]*>\s*(No|\d+) contributions?` $html -}}
+  {{- $n := 0 }}{{ if ne (index . 2) "No" }}{{ $n = int (index . 2) }}{{ end -}}
+  {{- $counts = merge $counts (dict (index . 1) $n) -}}
+{{- end -}}
+
+{{- /* Day cells: id gives ROW (weekday, 0 = Sunday) and COL (week); data-level is GitHub's 0-4 shade. */ -}}
+{{- $cells := slice -}}
+{{- $weeks := 0 -}}
+{{- range findRE `<td[^>]*class="ContributionCalendar-day"[^>]*>` $html -}}
+  {{- $id := index (findRESubmatch `id="(contribution-day-component-(\d+)-(\d+))"` . 1) 0 -}}
+  {{- $date := index (index (findRESubmatch `data-date="([\d-]+)"` . 1) 0) 1 -}}
+  {{- $lvl := index (index (findRESubmatch `data-level="(\d)"` . 1) 0) 1 -}}
+  {{- $col := int (index $id 3) -}}
+  {{- if ge $col $weeks }}{{ $weeks = add $col 1 }}{{ end -}}
+  {{- $cells = $cells | append (dict "row" (int (index $id 2)) "col" $col "date" (time.AsTime $date) "level" $lvl "count" (index $counts (index $id 1) | default 0)) -}}
+{{- end -}}
+
+{{- $total := 0 -}}
+{{- with findRESubmatch `([\d,]+)\s+contributions?\s+in the last year` $html 1 -}}
+  {{- $total = int (replace (index (index . 0) 1) "," "") -}}
+{{- else -}}
+  {{- range $cells }}{{ $total = add $total .count }}{{ end -}}
+{{- end -}}
+
+{{- if and $html (not $cells) -}}
+  {{- warnf "contributions: no days found on %s; GitHub may have changed the page" $url -}}
+{{- end -}}
+
+{{- with $cells -}}
+{{- /* Month labels at the first week of each month; skip one too close to the next or to the end. */ -}}
+{{- $firstOfWeek := dict -}}
+{{- range sort $cells "date" -}}
+  {{- $k := string .col -}}
+  {{- if not (index $firstOfWeek $k) }}{{ $firstOfWeek = merge $firstOfWeek (dict $k (.date.Format "Jan")) }}{{ end -}}
+{{- end -}}
+{{- $labels := slice -}}
+{{- $prev := index $firstOfWeek "0" -}}
+{{- range $i := seq 1 (sub $weeks 1) -}}
+  {{- $m := index $firstOfWeek (string $i) -}}
+  {{- if and $m (ne $m $prev) (le $i (sub $weeks 3)) }}{{ $labels = $labels | append (dict "i" $i "m" $m) }}{{ end -}}
+  {{- $prev = $m -}}
+{{- end -}}
+<section class="pane" aria-labelledby="h-contrib">
+<div class="pane-hd"><h2 id="h-contrib">{{ lang.FormatNumber 0 $total }} {{ cond (eq $total 1) "contribution" "contributions" }} in the last year</h2><a href="https://github.com/{{ $user }}">github{{ partial "icon.html" "external" }}</a></div>
+<div class="cal"><div class="cal-scroll" tabindex="0" role="group" aria-labelledby="h-contrib">
+<div class="cal-grid" style="--weeks:{{ $weeks }}">
+<div class="cal-months" aria-hidden="true">{{ range $labels }}<span style="grid-column:{{ add .i 1 }}/span 4">{{ .m }}</span>{{ end }}</div>
+<div class="cal-days" aria-hidden="true"><span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span></div>
+<div class="cal-cells" role="img" aria-label="{{ lang.FormatNumber 0 $total }} GitHub contributions in the last year, one square per day">
+{{- range $cells }}{{ $c := .count }}<span class="c{{ .level }}" style="grid-area:{{ add .row 1 }}/{{ add .col 1 }}" title="{{ if eq $c 0 }}No contributions{{ else }}{{ $c }} {{ cond (eq $c 1) "contribution" "contributions" }}{{ end }} on {{ .date | time.Format ":date_medium" }}"></span>{{ end -}}
+</div>
+</div></div>
+<div class="cal-legend" aria-hidden="true">Less<span class="l0"></span><span class="c1"></span><span class="c2"></span><span class="c3"></span><span class="c4 l4"></span>More</div>
+</div>
+</section>
+{{- end -}}

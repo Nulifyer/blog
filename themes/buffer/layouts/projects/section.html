@@ -1,0 +1,37 @@
+{{- define "main" }}
+{{- $all := .RegularPages }}
+{{- $pinned := sort (where $all "Params.pinned_rank" "gt" 0) "Params.pinned_rank" }}
+<header class="page-hd"><h1>{{ .Title }}</h1><span class="count" aria-label="{{ len $all }} projects">{{ len $all }}</span></header>
+{{- with $pinned }}
+<section class="sec" aria-labelledby="h-pin">
+<h2 class="sec-t" id="h-pin">{{ partial "icon.html" "pin" }}Pinned</h2>
+<div class="pins">{{ range . }}{{ partial "project-pin.html" . }}{{ end }}</div>
+</section>
+{{- end }}
+<section class="sec" aria-labelledby="h-all">
+<h2 class="sec-t" id="h-all">{{ partial "icon.html" "book" }}All projects</h2>
+{{- with $all }}
+<div class="pane tbl-pane"><table class="tbl" data-sort-table>
+<thead><tr>
+<th scope="col"><button type="button" data-key="name">name{{ partial "icon.html" "sort" }}</button></th>
+<th scope="col"><span>description</span></th>
+<th scope="col"><button type="button" data-key="lang">language{{ partial "icon.html" "sort" }}</button></th>
+<th scope="col" class="num"><button type="button" data-key="stars">stars{{ partial "icon.html" "sort" }}</button></th>
+<th scope="col" class="num" aria-sort="descending"><button type="button" data-key="updated">updated{{ partial "icon.html" "sort" }}</button></th>
+</tr></thead>
+<tbody>
+{{- range .ByLastmod.Reverse }}
+<tr data-name="{{ .Title }}" data-lang="{{ .Params.language }}" data-stars="{{ .Params.stars | default 0 }}" data-updated="{{ .Lastmod.Format "2006-01-02T15:04:05" }}">
+<td class="n"><div>{{ partial "project-icon.html" (dict "page" . "size" 24) }}<a class="t-link" href="{{ .RelPermalink }}">{{ .Title }}</a></div></td>
+<td class="d">{{ .Params.description }}</td>
+<td class="l">{{ partial "lang.html" . }}</td>
+<td class="st">{{ partial "icon.html" "star" }}<span class="vh">Stars:</span>{{ .Params.stars | default 0 }}</td>
+<td class="u"><time datetime="{{ .Lastmod.Format "2006-01-02" }}">{{ .Lastmod.Format "2006-01-02" }}</time></td>
+</tr>
+{{- end }}
+</tbody></table></div>
+{{- else }}
+<p class="pane-empty">No projects yet. Pin or star one of your repositories on GitHub; it appears after the next build.</p>
+{{- end }}
+</section>
+{{- end }}

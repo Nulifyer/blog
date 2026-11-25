@@ -1,66 +1,50 @@
-# Production URL comes from the workflow's --baseURL; this value is for local previews.
+# The stack passes --baseURL from SITE_HOST; this value is for local previews.
 baseURL = "https://blog.swarm.nulteck.com/"
 title = "nulifyer"
 locale = "en-US"
-theme = "PaperMod"
+theme = "buffer"
 enableRobotsTXT = true
-enableGitInfo = false
 disableKinds = ["taxonomy", "term"]
 
 [pagination]
-  pagerSize = 10
+  pagerSize = 20
 
 [outputs]
   home = ["HTML", "RSS", "JSON"]
 
 [markup.highlight]
-  noClasses = false   # colors come from assets/css/includes/chroma-styles.css (Gruvbox)
+  noClasses = false   # Gruvbox colours come from the theme's chroma.css
 
 [markup.goldmark.renderer]
-  unsafe = true   # project READMEs often contain raw HTML
+  unsafe = true       # project READMEs often contain raw HTML
 
 [caches.getresource]
-  maxAge = "10m"  # keeps local rebuilds from hammering the GitHub API
+  maxAge = "10m"      # keeps rebuilds from hammering the GitHub API
 
 [params]
-  env = "production"
   description = "Write-ups on the things I build, and the projects they're about."
-  author = "nulifyer"
-  ShowFullTextinRSS = true
-  mainSections = ["posts"]
-  defaultTheme = "auto"
-  ShowBreadCrumbs = true
-  ShowReadingTime = true
-  ShowPostNavLinks = true
-  ShowCodeCopyButtons = true
-  ShowToc = true
-  TocOpen = false
-
   intro = "Write-ups on the things I build, and the projects they're about."
-
-  [params.assets]
-    theme_color = "#202020"
-
-  [params.schema]
-    publisherType = "Person"
-    sameAs = ["https://github.com/nulifyer"]
+  author = "nulifyer"
+  avatar = "icon-source.png"   # asset path; cropped square for the home page, schema and cards
+  mainSections = ["posts"]
 
   [params.github]
     user = "nulifyer"
 
-  [[params.socialIcons]]
+  [[params.social]]
     name = "github"
+    label = "github.com/nulifyer"
     url = "https://github.com/nulifyer"
-  [[params.socialIcons]]
-    name = "rss"
-    url = "/index.xml"
+    icon = "github"
 
-[menu]
-  [[menu.main]]
-    name = "Posts"
-    url = "/posts/"
-    weight = 10
-  [[menu.main]]
-    name = "Projects"
-    url = "/projects/"
-    weight = 20
+[[menu.main]]
+  name = "posts"
+  url = "/posts/"
+  weight = 10
+  params = { icon = "file-text" }
+
+[[menu.main]]
+  name = "projects"
+  url = "/projects/"
+  weight = 20
+  params = { icon = "book" }

@@ -1,0 +1,4 @@
+name = "Buffer"
+description = "Editor-inspired Gruvbox theme for a personal site: posts, GitHub projects, contribution graph."
+license = "MIT"
+min_version = "0.158.0"
