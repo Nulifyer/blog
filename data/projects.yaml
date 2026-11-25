@@ -1,6 +1,11 @@
 # The Projects page lists repos you own that are pinned on your GitHub profile or starred by you.
 # Pinned repos come first, in profile order. Change pins or stars on GitHub; the site picks it up
 # on the next build (at least daily).
-#
+
 # Leave these repos off the site even if pinned or starred:
 hide: []
+
+# Project icons come from the first README image whose alt text or path mentions "logo" or "icon".
+# Set one here when a README has none: repo name -> path in the repo, or a full URL.
+icons: {}
+#  ShareToLens: app/src/main/ic_launcher-playstore.png

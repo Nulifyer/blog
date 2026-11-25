@@ -1,0 +1,456 @@
+/* Site additions on top of PaperMod. Colors come from the theme variables so both themes work. */
+
+:root {
+    --contrib-0: rgb(235, 237, 240);
+    --contrib-1: rgb(155, 233, 168);
+    --contrib-2: rgb(64, 196, 99);
+    --contrib-3: rgb(48, 161, 78);
+    --contrib-4: rgb(33, 110, 57);
+    --focus: rgb(9, 105, 218);
+}
+
+:root[data-theme="dark"] {
+    --contrib-0: rgb(44, 45, 50);
+    --contrib-1: rgb(14, 68, 41);
+    --contrib-2: rgb(0, 109, 50);
+    --contrib-3: rgb(38, 166, 65);
+    --contrib-4: rgb(57, 211, 83);
+    --focus: rgb(88, 166, 255);
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* ---------- header search ---------- */
+
+.site-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    align-self: center;
+    line-height: normal;
+    width: 15rem;
+}
+
+.site-search[hidden] {
+    display: none;
+}
+
+.site-search input {
+    width: 100%;
+    height: 36px;
+    padding: 0 2rem 0 2.1rem;
+    font: inherit;
+    font-size: 15px;
+    color: var(--primary);
+    background: var(--code-bg);
+    border: 1px solid var(--tertiary);
+    border-radius: var(--radius);
+}
+
+.site-search input::placeholder {
+    color: var(--secondary);
+    opacity: 1;
+}
+
+.site-search input:focus {
+    outline: 2px solid var(--focus);
+    outline-offset: -1px;
+    background: var(--theme);
+}
+
+.site-search input::-webkit-search-cancel-button {
+    display: none;
+}
+
+.site-search-icon {
+    position: absolute;
+    left: 0.7rem;
+    color: var(--secondary);
+    pointer-events: none;
+}
+
+.site-search-key {
+    position: absolute;
+    right: 0.5rem;
+    min-width: 1.25rem;
+    padding: 1px 4px;
+    font-family: inherit;
+    font-size: 12px;
+    line-height: 1.4;
+    text-align: center;
+    color: var(--secondary);
+    border: 1px solid var(--tertiary);
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+.site-search input:focus ~ .site-search-key,
+.site-search input:not(:placeholder-shown) ~ .site-search-key {
+    display: none;
+}
+
+.site-search-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: 100;
+    width: min(28rem, calc(100vw - var(--gap) * 2));
+    max-height: min(26rem, 70vh);
+    overflow-y: auto;
+    padding: 4px;
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+}
+
+.site-search-panel[hidden] {
+    display: none;
+}
+
+.site-search-panel ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.site-search-panel li {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-height: 44px;
+    padding: 8px 10px;
+    border-radius: calc(var(--radius) - 3px);
+    cursor: pointer;
+}
+
+.site-search-panel li[aria-selected="true"] {
+    background: var(--code-bg);
+    box-shadow: inset 3px 0 0 var(--focus);
+}
+
+.site-search-title {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.site-search-kind {
+    flex: none;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--secondary);
+}
+
+.site-search-desc {
+    overflow: hidden;
+    font-size: 14px;
+    color: var(--secondary);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.site-search-message {
+    margin: 0;
+    padding: 10px;
+    font-size: 15px;
+    color: var(--secondary);
+}
+
+@media screen and (max-width: 640px) {
+    .site-search {
+        order: 3;
+        width: 100%;
+        padding-bottom: 12px;
+    }
+
+    .site-search-panel {
+        top: calc(100% - 6px);
+        left: 0;
+        width: auto;
+    }
+
+    .site-search-key {
+        display: none;
+    }
+}
+
+/* ---------- home ---------- */
+
+.home-intro {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.home-avatar {
+    flex: none;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+}
+
+.home-title {
+    font-size: 32px;
+    line-height: 1.2;
+}
+
+.home-lead {
+    margin-top: 6px;
+    font-size: 17px;
+    color: var(--secondary);
+}
+
+.home-section {
+    margin-bottom: 44px;
+}
+
+.home-section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 16px;
+    margin-bottom: 14px;
+}
+
+.home-section-head h2 {
+    font-size: 20px;
+    line-height: 1.3;
+}
+
+.home-section-head a,
+.home-empty {
+    font-size: 15px;
+    color: var(--secondary);
+}
+
+.home-section-head a:hover {
+    color: var(--primary);
+    text-decoration: underline;
+}
+
+.post-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.post-list li {
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+}
+
+.post-list li:last-child {
+    border-bottom: 1px solid var(--border);
+}
+
+.post-list-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.post-list-title:hover {
+    text-decoration: underline;
+}
+
+.post-list time {
+    display: block;
+    margin-top: 2px;
+    font-size: 14px;
+    color: var(--secondary);
+}
+
+.post-list p {
+    margin-top: 6px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--content);
+}
+
+/* ---------- contribution graph ---------- */
+
+.contrib-box {
+    padding: 14px 14px 10px;
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+[data-theme="dark"] .contrib-box {
+    background: var(--theme);
+}
+
+.contrib-scroll {
+    overflow-x: auto;
+}
+
+.contrib-graph {
+    display: block;
+}
+
+.contrib-label {
+    font-size: 12px;
+    fill: var(--secondary);
+}
+
+.c0 { fill: var(--contrib-0); }
+.c1 { fill: var(--contrib-1); }
+.c2 { fill: var(--contrib-2); }
+.c3 { fill: var(--contrib-3); }
+.c4 { fill: var(--contrib-4); }
+
+.contrib-legend {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 3px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--secondary);
+}
+
+.contrib-legend svg:first-of-type {
+    margin-left: 4px;
+}
+
+.contrib-legend svg:last-of-type {
+    margin-right: 4px;
+}
+
+/* ---------- projects ---------- */
+
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: 12px;
+}
+
+.project-list {
+    display: grid;
+    gap: 12px;
+}
+
+.project-group {
+    margin-bottom: 36px;
+}
+
+.project-group h2 {
+    margin-bottom: 14px;
+    font-size: 20px;
+}
+
+.project-card {
+    position: relative;
+    display: flex;
+    gap: 14px;
+    padding: 16px;
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.project-card:hover {
+    border-color: var(--tertiary);
+}
+
+.project-card:focus-within {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+}
+
+.project-card-body {
+    min-width: 0;
+}
+
+.project-card-title {
+    font-size: 17px;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+/* The title link covers the whole card. */
+.project-card-title a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
+.project-card-title a:focus {
+    outline: none;
+}
+
+.project-card-desc {
+    display: -webkit-box;
+    margin-top: 4px;
+    overflow: hidden;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--content);
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.project-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 14px;
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--secondary);
+}
+
+.project-icon {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.project-icon-letter {
+    display: grid;
+    place-items: center;
+    width: var(--size, 40px);
+    height: var(--size, 40px);
+    font-size: calc(var(--size, 40px) * 0.45);
+    font-weight: 700;
+    color: var(--secondary);
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+}
+
+.project-header {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+}
+
+.project-header .project-icon {
+    width: 56px;
+    height: 56px;
+    margin-top: 6px;
+    border-radius: 12px;
+}
+
+/* README badges and inline images sit in a row, as on GitHub. */
+.project-readme p > img,
+.project-readme p > a > img,
+.project-readme div > a > img {
+    display: inline-block;
+    margin: 2px 1px;
+    vertical-align: middle;
+}

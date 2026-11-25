@@ -1,0 +1,21 @@
+{{- /* Context: dict "page" and "size" (CSS px). Falls back to the first letter of the name. */ -}}
+{{- $p := .page -}}{{- $size := .size -}}
+{{- $src := "" -}}
+{{- with $p.Params.icon_url -}}
+  {{- with try (resources.GetRemote .) -}}
+    {{- with .Err -}}{{- warnf "project icon for %s: %s" $p.Title . -}}
+    {{- else with .Value -}}
+      {{- if eq .MediaType.SubType "svg" -}}
+        {{- $src = .RelPermalink -}}
+      {{- else if in (slice "png" "jpeg" "webp" "gif") .MediaType.SubType -}}
+        {{- $px := mul $size 2 -}}
+        {{- $src = (.Fit (printf "%dx%d png" $px $px)).RelPermalink -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if $src -}}
+<img class="project-icon" src="{{ $src }}" width="{{ $size }}" height="{{ $size }}" alt="" loading="lazy">
+{{- else -}}
+<span class="project-icon project-icon-letter" style="--size: {{ $size }}px" aria-hidden="true">{{ substr (strings.TrimLeft "." $p.Title) 0 1 | upper }}</span>
+{{- end -}}

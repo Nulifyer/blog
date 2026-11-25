@@ -1,15 +1,25 @@
 {{- define "main" }}
 <header class="page-header">
-  {{- partial "breadcrumbs.html" . }}
   <h1>{{ .Title }}</h1>
   {{- with .Description }}
   <div class="post-description">{{ . | markdownify }}</div>
   {{- end }}
 </header>
-{{- with .Content }}<div class="post-content md-content">{{ . }}</div>{{ end }}
-
-{{- $featured := sort (where .RegularPages "Params.featured_rank" "gt" 0) "Params.featured_rank" }}
-{{- $rest := (where .RegularPages "Params.featured_rank" 0).ByLastmod.Reverse }}
-{{- range $featured }}{{ partial "project-card.html" . }}{{ end }}
-{{- range $rest }}{{ partial "project-card.html" . }}{{ end }}
+{{- $pinned := sort (where .RegularPages "Params.pinned_rank" "gt" 0) "Params.pinned_rank" }}
+{{- $starred := (where .RegularPages "Params.pinned_rank" 0).ByLastmod.Reverse }}
+{{- with $pinned }}
+<section class="project-group" aria-labelledby="projects-pinned">
+  <h2 id="projects-pinned">Pinned</h2>
+  <div class="project-list">{{ range . }}{{ partial "project-card.html" . }}{{ end }}</div>
+</section>
+{{- end }}
+{{- with $starred }}
+<section class="project-group" aria-labelledby="projects-starred">
+  <h2 id="projects-starred">Starred</h2>
+  <div class="project-list">{{ range . }}{{ partial "project-card.html" . }}{{ end }}</div>
+</section>
+{{- end }}
+{{- if not .RegularPages }}
+<p class="home-empty">No projects yet. Pin or star one of your repositories on GitHub; it appears after the next build.</p>
+{{- end }}
 {{- end }}

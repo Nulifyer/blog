@@ -1,0 +1,6 @@
+{{- with resources.Get "js/site-search.js" | js.Build (dict "minify" true) | fingerprint }}
+<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" defer></script>
+{{- end }}
+<script>
+  for (const el of document.querySelectorAll(".contrib-scroll")) el.scrollLeft = el.scrollWidth;
+</script>

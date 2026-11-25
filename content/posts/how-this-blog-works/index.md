@@ -1,7 +1,6 @@
 ---
 title: "How this blog works"
 date: 2026-11-25
-tags: [homelab, hugo]
 description: "Markdown in a GitHub repo, built by GitHub Actions, served from my homelab."
 ---
 

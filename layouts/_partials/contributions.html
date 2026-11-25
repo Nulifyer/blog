@@ -1,0 +1,72 @@
+{{- /* GitHub contribution calendar, fetched at build time (needs HUGO_GITHUB_TOKEN). */ -}}
+{{- $user := site.Params.github.user -}}
+{{- $token := os.Getenv "HUGO_GITHUB_TOKEN" -}}
+{{- $cal := dict -}}
+{{- if $token -}}
+  {{- $query := printf `{ user(login: %q) { contributionsCollection { contributionCalendar { totalContributions weeks { contributionDays { date contributionCount contributionLevel } } } } } }` $user -}}
+  {{- $opts := dict "method" "post" "body" (dict "query" $query | jsonify) "headers" (dict "Authorization" (printf "Bearer %s" $token) "Content-Type" "application/json") -}}
+  {{- with try (resources.GetRemote "https://api.github.com/graphql" $opts) -}}
+    {{- with .Err -}}{{- warnf "contributions: %s" . -}}
+    {{- else with .Value -}}
+      {{- $data := . | transform.Unmarshal -}}
+      {{- with $data.errors -}}{{- warnf "contributions: %v" . -}}
+      {{- else -}}{{- $cal = $data.data.user.contributionsCollection.contributionCalendar -}}{{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- else -}}
+  {{- warnf "contributions: HUGO_GITHUB_TOKEN is not set, so the activity graph is skipped" -}}
+{{- end -}}
+
+{{- with $cal.weeks -}}
+{{- $weeks := . -}}
+{{- $cell := 10 -}}{{- $step := 12 -}}{{- $left := 28 -}}{{- $top := 18 -}}
+{{- $width := add $left (mul (len $weeks) $step) -}}
+{{- $height := add $top (mul 7 $step) -}}
+{{- $row := dict "Sun" 0 "Mon" 1 "Tue" 2 "Wed" 3 "Thu" 4 "Fri" 5 "Sat" 6 -}}
+{{- $level := dict "NONE" 0 "FIRST_QUARTILE" 1 "SECOND_QUARTILE" 2 "THIRD_QUARTILE" 3 "FOURTH_QUARTILE" 4 -}}
+{{- $total := $cal.totalContributions -}}
+
+{{- /* Month labels: at the first week of each month, skipping one too close to the next. */ -}}
+{{- $labels := slice -}}
+{{- $prev := "" -}}
+{{- range $i, $w := $weeks -}}
+  {{- $m := (time.AsTime (index $w.contributionDays 0).date).Format "Jan" -}}
+  {{- if ne $m $prev -}}{{- $labels = $labels | append (dict "i" $i "m" $m) -}}{{- end -}}
+  {{- $prev = $m -}}
+{{- end -}}
+
+<section class="home-section contrib" aria-labelledby="home-activity">
+  <div class="home-section-head">
+    <h2 id="home-activity">{{ lang.FormatNumber 0 $total }} {{ cond (eq $total 1) "contribution" "contributions" }} in the last year</h2>
+    <a href="https://github.com/{{ $user }}">GitHub profile</a>
+  </div>
+  <div class="contrib-box">
+    <div class="contrib-scroll">
+      <svg class="contrib-graph" width="{{ $width }}" height="{{ $height }}" viewBox="0 0 {{ $width }} {{ $height }}"
+        role="img" aria-label="{{ lang.FormatNumber 0 $total }} GitHub contributions in the last year, by day">
+        {{- range $n, $l := $labels }}
+        {{- $next := cond (lt (add $n 1) (len $labels)) (index $labels (add $n 1)).i 999 }}
+        {{- if ge (sub $next $l.i) 3 }}
+        <text x="{{ add $left (mul $l.i $step) }}" y="12" class="contrib-label">{{ $l.m }}</text>
+        {{- end }}
+        {{- end }}
+        <text x="0" y="{{ add $top (mul 1 $step) 9 }}" class="contrib-label">Mon</text>
+        <text x="0" y="{{ add $top (mul 3 $step) 9 }}" class="contrib-label">Wed</text>
+        <text x="0" y="{{ add $top (mul 5 $step) 9 }}" class="contrib-label">Fri</text>
+        {{- range $i, $w := $weeks }}
+        {{- range $w.contributionDays }}
+        {{- $t := time.AsTime .date }}
+        {{- $c := .contributionCount }}
+        <rect x="{{ add $left (mul $i $step) }}" y="{{ add $top (mul (index $row ($t.Format "Mon")) $step) }}" width="{{ $cell }}" height="{{ $cell }}" rx="2" class="c{{ index $level .contributionLevel }}"><title>{{ if eq $c 0 }}No contributions{{ else }}{{ $c }} {{ cond (eq $c 1) "contribution" "contributions" }}{{ end }} on {{ $t | time.Format ":date_medium" }}</title></rect>
+        {{- end }}
+        {{- end }}
+      </svg>
+    </div>
+    <div class="contrib-legend" aria-hidden="true">
+      Less
+      {{- range seq 0 4 }}<svg width="{{ $cell }}" height="{{ $cell }}"><rect width="{{ $cell }}" height="{{ $cell }}" rx="2" class="c{{ . }}"/></svg>{{ end }}
+      More
+    </div>
+  </div>
+</section>
+{{- end -}}

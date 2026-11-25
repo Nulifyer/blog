@@ -4,6 +4,7 @@ title = "nulifyer"
 theme = "PaperMod"
 enableRobotsTXT = true
 enableGitInfo = false
+disableKinds = ["taxonomy", "term"]
 
 [pagination]
   pagerSize = 10
@@ -29,12 +30,10 @@ enableGitInfo = false
   ShowToc = true
   TocOpen = false
 
+  intro = "Write-ups on the things I build, and the projects they're about."
+
   [params.github]
     user = "nulifyer"
-
-  [params.homeInfoParams]
-    Title = "Hi, I'm nulifyer"
-    Content = "Write-ups on the things I build. The [projects](/projects/) page lists the GitHub repos I've pinned or starred."
 
   [[params.socialIcons]]
     name = "github"
@@ -52,15 +51,3 @@ enableGitInfo = false
     name = "Projects"
     url = "/projects/"
     weight = 20
-  [[menu.main]]
-    name = "Archive"
-    url = "/archives/"
-    weight = 30
-  [[menu.main]]
-    name = "Tags"
-    url = "/tags/"
-    weight = 40
-  [[menu.main]]
-    name = "Search"
-    url = "/search/"
-    weight = 50

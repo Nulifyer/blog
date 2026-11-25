@@ -1,0 +1,54 @@
+{{- define "main" }}
+<div class="home">
+  <header class="home-intro">
+    {{- with resources.Get "icon-source.png" }}
+    {{- $avatar := .Fill "160x160 Center" }}
+    <img class="home-avatar" src="{{ $avatar.RelPermalink }}" width="80" height="80" alt="">
+    {{- end }}
+    <div>
+      <h1 class="home-title">{{ site.Title }}</h1>
+      <p class="home-lead">{{ site.Params.intro }}</p>
+    </div>
+  </header>
+
+  {{- partialCached "contributions.html" . }}
+
+  <section class="home-section" aria-labelledby="home-posts">
+    <div class="home-section-head">
+      <h2 id="home-posts">Recent posts</h2>
+      {{- $posts := where site.RegularPages "Section" "posts" }}
+      {{- if gt (len $posts) 3 }}<a href="{{ "posts/" | relURL }}">All {{ len $posts }} posts</a>{{ end }}
+    </div>
+    {{- with first 3 $posts }}
+    <ul class="post-list">
+      {{- range . }}
+      <li>
+        <a class="post-list-title" href="{{ .RelPermalink }}">{{ .Title }}</a>
+        <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date | time.Format ":date_medium" }}</time>
+        {{- with .Description }}<p>{{ . }}</p>{{ end }}
+      </li>
+      {{- end }}
+    </ul>
+    {{- else }}
+    <p class="home-empty">No posts yet.</p>
+    {{- end }}
+  </section>
+
+  {{- with site.GetPage "/projects" }}
+  {{- $pinned := sort (where .RegularPages "Params.pinned_rank" "gt" 0) "Params.pinned_rank" }}
+  <section class="home-section" aria-labelledby="home-projects">
+    <div class="home-section-head">
+      <h2 id="home-projects">Pinned projects</h2>
+      <a href="{{ .RelPermalink }}">All {{ len .RegularPages }} projects</a>
+    </div>
+    {{- with $pinned }}
+    <div class="project-grid">
+      {{- range . }}{{ partial "project-card.html" . }}{{ end }}
+    </div>
+    {{- else }}
+    <p class="home-empty">No pinned projects. Pin repositories on your GitHub profile to show them here.</p>
+    {{- end }}
+  </section>
+  {{- end }}
+</div>
+{{- end }}

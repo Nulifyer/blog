@@ -28,7 +28,6 @@ content/posts/my-new-post/
 ---
 title: "My new post"
 date: 2026-11-25
-tags: [homelab]
 description: "One line shown in lists and link previews."
 draft: false
 ---
@@ -42,11 +41,18 @@ build runs after that date.
 ## Projects page
 
 `content/projects/_content.gotmpl` creates one page per repo you own that is pinned on your
-GitHub profile or starred by you, using the repo's README as the page body and its topics as
-tags. Pinned repos come first. Stars on other people's repos are ignored. To add or remove a
+GitHub profile or starred by you, using the repo's README as the page body. Pinned repos come first. Stars on other people's repos are ignored. To add or remove a
 project, pin, unpin, star or unstar it on GitHub; the next build (at least daily) picks it up.
 To keep a pinned or starred repo off the site, list it under `hide` in
 [`data/projects.yaml`](data/projects.yaml).
+
+A project's icon is the first README image whose alt text or path mentions "logo" or "icon".
+For a repo without one, set `icons` in the same file; otherwise the card shows the name's first letter.
+
+## Home page
+
+The home page shows the GitHub contribution graph for the last year, the three newest posts and
+the pinned projects. The graph is fetched at build time, so it updates with the daily build.
 
 ## Local preview
 

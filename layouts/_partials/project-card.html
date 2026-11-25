@@ -1,14 +1,12 @@
-<article class="post-entry">
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">{{ .Title }}{{ if gt .Params.featured_rank 0 }} <span class="entry-hint" title="Pinned on GitHub">📌</span>{{ end }}</h2>
-  </header>
-  {{- with .Params.description }}
-  <div class="entry-content"><p>{{ . }}</p></div>
-  {{- end }}
-  <footer class="entry-footer">
-    {{- with .Params.language }}<span>{{ . }}</span>&nbsp;·&nbsp;{{ end -}}
-    <span>{{ .Params.stars }} {{ cond (eq .Params.stars 1) "star" "stars" }}</span>&nbsp;·&nbsp;
-    <span>Updated {{ .Lastmod | time.Format ":date_medium" }}</span>
-  </footer>
-  <a class="entry-link" aria-label="project page for {{ .Title }}" href="{{ .Permalink }}"></a>
+<article class="project-card">
+  {{ partial "project-icon.html" (dict "page" . "size" 40) }}
+  <div class="project-card-body">
+    <h3 class="project-card-title"><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
+    {{- with .Params.description }}<p class="project-card-desc">{{ . }}</p>{{ end }}
+    <p class="project-card-meta">
+      {{- with .Params.language }}<span>{{ . }}</span>{{ end }}
+      <span>{{ .Params.stars }} {{ cond (eq .Params.stars 1) "star" "stars" }}</span>
+      <span>Updated {{ .Lastmod | time.Format ":date_medium" }}</span>
+    </p>
+  </div>
 </article>

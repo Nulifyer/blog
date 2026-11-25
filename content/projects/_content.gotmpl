@@ -76,8 +76,29 @@
       {{- with (. | transform.Unmarshal).content -}}{{- $readme = replace . "\n" "" | base64Decode -}}{{- end -}}
     {{- end -}}
   {{- end -}}
+  {{- /* Icon: an override in data/projects.yaml, else the first README image whose alt text or
+         path mentions "logo" or "icon" (badges excluded). Resolved before READMEs are rewritten. */ -}}
+  {{- $icon := "" -}}
+  {{- $candidates := slice -}}
+  {{- range findRESubmatch `(?i)<img[^>]*?\ssrc="([^"]+)"[^>]*>` $readme -}}
+    {{- $candidates = $candidates | append (dict "match" (index . 0) "src" (index . 1)) -}}
+  {{- end -}}
+  {{- range findRESubmatch `!\[([^\]]*)\]\(([^)\s]+)` $readme -}}
+    {{- $candidates = $candidates | append (dict "match" (index . 0) "src" (index . 2)) -}}
+  {{- end -}}
+  {{- range $candidates -}}
+    {{- if and (not $icon) (findRE `(?i)logo|icon` .match) (not (findRE `(?i)shields\.io|badge|/workflows/` .match)) -}}
+      {{- $icon = cond (hasPrefix .src "http") .src (printf "%s%s" $raw (strings.TrimLeft "./" .src)) -}}
+      {{- /* The page header shows the icon, so drop it from the README body. */ -}}
+      {{- $readme = replace $readme .match "" 1 -}}
+    {{- end -}}
+  {{- end -}}
+  {{- with index ($cfg.icons | default dict) .name -}}
+    {{- $icon = cond (hasPrefix . "http") . (printf "%s%s" $raw (strings.TrimLeft "./" .)) -}}
+  {{- end -}}
+
   {{- /* The page already shows the repo name as its title. */ -}}
-  {{- $readme = replaceRE `\A\s*#[ \t]+[^\n]*\n` "" $readme 1 -}}
+  {{- $readme = replaceRE (printf `(?im)^[ \t]*#[ \t]+%s[ \t]*$` (.name | replaceRE `([.\\+*?()|\[\]{}^$])` `\$1`)) "" $readme 1 -}}
   {{- /* Raw HTML <img src="relative"> bypasses render hooks, so point it at the repo here. */ -}}
   {{- $readme = replaceRE `(<img[^>]*?\ssrc=")(?:\./|/)?([^":#]+")` (printf "${1}%s${2}" $raw) $readme -}}
   {{- if not $readme -}}
@@ -103,8 +124,9 @@
       "language" (.language | default "")
       "stars" .stargazers_count
       "fork" .fork
-      "tags" (.topics | default slice)
-      "featured_rank" $rank
+      "topics" (.topics | default slice)
+      "icon_url" $icon
+      "pinned_rank" $rank
     )
     "content" (dict "mediaType" "text/markdown" "value" $readme)
   ) -}}
