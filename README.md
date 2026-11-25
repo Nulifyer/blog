@@ -58,8 +58,10 @@ project, pin, unpin, star or unstar it on GitHub; the hourly rebuild picks it up
 To keep a pinned or starred repo off the site, list it under `hide` in
 [`data/projects.yaml`](data/projects.yaml).
 
-A project's icon is the first README image whose alt text or path mentions "logo" or "icon".
-For a repo without one, set `icons` in the same file; otherwise the card shows the name's first letter.
+A project's icon is the first README image whose alt text or path mentions "logo" or "icon"; if the
+README has none, the first of `docs/icon.svg`, `docs/assets/icon.svg`, `docs/logo.svg`, `icon.svg`,
+`logo.svg`, `.github/icon.svg`, `docs/icon.png` or `icon.png` found in the repo. `icons` in the same
+file overrides both; without any icon the card shows a two-letter tile.
 
 ## Home page
 

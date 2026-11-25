@@ -90,6 +90,17 @@
       {{- $readme = replace $readme .match "" 1 -}}
     {{- end -}}
   {{- end -}}
+  {{- /* No logo in the README: try the usual icon paths in the repo (first hit wins). */ -}}
+  {{- if not $icon -}}
+    {{- range $path := slice "docs/icon.svg" "docs/assets/icon.svg" "docs/logo.svg" "icon.svg" "logo.svg" ".github/icon.svg" "docs/icon.png" "icon.png" -}}
+      {{- if not $icon -}}
+        {{- with try (resources.GetRemote (printf "%s%s" $raw $path)) -}}
+          {{- with .Err }}{{ warnf "projects: icon check for %s/%s: %s" $repo.name $path . }}
+          {{- else with .Value }}{{ $icon = printf "%s%s" $raw $path }}{{ end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
   {{- with index ($cfg.icons | default dict) .name -}}
     {{- $icon = cond (hasPrefix . "http") . (printf "%s%s" $raw (strings.TrimLeft "./" .)) -}}
   {{- end -}}

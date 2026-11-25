@@ -5,7 +5,8 @@
 # Leave these repos off the site even if pinned or starred:
 hide: []
 
-# Project icons come from the first README image whose alt text or path mentions "logo" or "icon".
-# Set one here when a README has none: repo name -> path in the repo, or a full URL.
+# Project icons: the first README image whose alt text or path mentions "logo" or "icon"; else the
+# first of docs/icon.svg, docs/assets/icon.svg, docs/logo.svg, icon.svg, logo.svg, .github/icon.svg,
+# docs/icon.png, icon.png that exists in the repo. Override here: repo name -> path in the repo, or a URL.
 icons: {}
 #  ShareToLens: app/src/main/ic_launcher-playstore.png
