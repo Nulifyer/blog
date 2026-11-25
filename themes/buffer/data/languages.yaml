@@ -1,21 +1,21 @@
-# GitHub language -> palette hue (used for the language mark and project monograms).
-C#: purple
-F#: purple
-Go: aqua
-Kotlin: orange
-Java: orange
-Rust: orange
-Zig: orange
-TypeScript: blue
-JavaScript: yellow
-Python: blue
-Shell: green
-PowerShell: blue
-Lua: blue
-QML: green
-C: blue
-C++: red
-HTML: red
-CSS: purple
-Odin: aqua
-Nix: blue
+# GitHub language -> palette hue and logo (symbol in assets/icons/languages.svg).
+"C#": { hue: purple, icon: csharp }
+"F#": { hue: blue, icon: fsharp }
+"Go": { hue: aqua, icon: go }
+"Kotlin": { hue: orange, icon: kotlin }
+"Java": { hue: orange, icon: openjdk }
+"Rust": { hue: orange, icon: rust }
+"Zig": { hue: orange, icon: zig }
+"TypeScript": { hue: blue, icon: typescript }
+"JavaScript": { hue: yellow, icon: javascript }
+"Python": { hue: blue, icon: python }
+"Shell": { hue: green, icon: gnubash }
+"PowerShell": { hue: blue, icon: powershell }
+"Lua": { hue: blue, icon: lua }
+"QML": { hue: green, icon: qt }
+"C": { hue: blue, icon: c }
+"C++": { hue: red, icon: cplusplus }
+"HTML": { hue: red, icon: html5 }
+"CSS": { hue: purple, icon: css }
+"Odin": { hue: aqua, icon: odin }
+"Nix": { hue: blue, icon: nixos }

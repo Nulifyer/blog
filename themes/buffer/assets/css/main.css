@@ -328,3 +328,7 @@ mark { background: none; color: inherit; font-weight: 700; text-decoration: unde
 
 /* README badges load from external hosts without sizes; reserve their standard height to avoid layout shift. */
 .prose img[src*="img.shields.io"], .prose img[src*="/badge.svg"], .prose img[src*="badges"] { height: 20px; width: auto; }
+
+/* Language logos are filled shapes, not strokes. */
+.ic-logo { fill: currentColor; stroke: none; }
+.lang .ic-logo { width: 16px; height: 16px; }

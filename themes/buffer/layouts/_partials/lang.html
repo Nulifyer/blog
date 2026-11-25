@@ -1,4 +1,12 @@
+{{- /* Language mark: logo (from the cached languages.svg sprite) tinted with the language's palette hue. */ -}}
 {{- with .Params.language -}}
-{{- $hue := index hugo.Data.languages . | default "" -}}
-<span class="lang{{ with $hue }} lang-{{ . }}{{ end }}">{{ partial "icon.html" "code" }}{{ . }}</span>
+{{- $l := index hugo.Data.languages . | default dict -}}
+<span class="lang{{ with $l.hue }} lang-{{ . }}{{ end }}">
+{{- with $l.icon -}}
+{{- $sprite := resources.Get "icons/languages.svg" | minify | fingerprint -}}
+<svg class="ic ic-logo" aria-hidden="true" focusable="false"><use href="{{ $sprite.RelPermalink }}#l-{{ . }}"/></svg>
+{{- else -}}
+{{ partial "icon.html" "code" }}
+{{- end -}}
+{{ . }}</span>
 {{- end -}}

@@ -13,7 +13,7 @@
     {{- end -}}
   {{- end -}}
 {{- end -}}
-{{- $hue := index hugo.Data.languages ($p.Params.language | default "") | default "" -}}
+{{- $hue := (index hugo.Data.languages ($p.Params.language | default "") | default dict).hue | default "" -}}
 {{- if $src -}}
 <span class="p-icon has-img" style="--size:{{ $size }}px"><img src="{{ $src }}" width="{{ $size }}" height="{{ $size }}" alt="" loading="lazy" decoding="async"></span>
 {{- else -}}

@@ -57,9 +57,11 @@ Markdown extras:
 `layouts/projects/` renders the project pages a content adapter creates (see this site's
 `content/projects/_content.gotmpl`). Expected page params: `description`, `repo_url`, `full_name`,
 `default_branch`, `homepage`, `language`, `stars`, `topics`, `icon_url`, `pinned_rank` (0 = not pinned).
-`data/languages.yaml` maps GitHub languages to palette hues for the language mark and monograms.
+`data/languages.yaml` maps GitHub languages to a palette hue and a logo in `assets/icons/languages.svg`
+(a cached external sprite). Languages without a logo show a generic code icon.
 
 ## Licences
 
 Fonts: Hack (MIT/Bitstream Vera), Fira Sans (SIL OFL 1.1); licence files are in `assets/fonts/`.
-Icons: Lucide (ISC).
+Icons: Lucide (ISC). Language logos: Simple Icons (CC0 1.0), C# and PowerShell from Devicon (MIT);
+the brands themselves belong to their owners.
