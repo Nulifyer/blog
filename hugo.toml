@@ -12,6 +12,9 @@ disableKinds = ["taxonomy", "term"]
 [outputs]
   home = ["HTML", "RSS", "JSON"]
 
+[markup.highlight]
+  noClasses = false   # colors come from assets/css/includes/chroma-styles.css (Gruvbox)
+
 [markup.goldmark.renderer]
   unsafe = true   # project READMEs often contain raw HTML
 

@@ -1,21 +1,63 @@
 /* Site additions on top of PaperMod. Colors come from the theme variables so both themes work. */
 
+/* Theme: Nulifyer Gruvbox Light / Dark (the KDE color schemes in dotfiles/kde).
+   Muted text and light-mode links use darker Gruvbox shades so small text meets 4.5:1. */
 :root {
-    --contrib-0: rgb(235, 237, 240);
-    --contrib-1: rgb(155, 233, 168);
-    --contrib-2: rgb(64, 196, 99);
-    --contrib-3: rgb(48, 161, 78);
-    --contrib-4: rgb(33, 110, 57);
-    --focus: rgb(9, 105, 218);
+    --theme: #fbf1c7;
+    --entry: #fbf1c7;
+    --primary: #3c3836;
+    --content: #3c3836;
+    --secondary: #665c54;
+    --tertiary: #d5c4a1;
+    --border: #ebdbb2;
+    --code-bg: #f2e5bc;
+    --code-block-bg: #f2e5bc;
+    --code-fg: #3c3836;
+    --link: #076678;
+    --focus: #b57614;
+    --selection-bg: #d79921;
+    --selection-fg: #282828;
+    --contrib-0: #ebdbb2;
+    --contrib-1: #d3cd82;
+    --contrib-2: #b6b24e;
+    --contrib-3: #98971a;
+    --contrib-4: #79740e;
 }
 
 :root[data-theme="dark"] {
-    --contrib-0: rgb(44, 45, 50);
-    --contrib-1: rgb(14, 68, 41);
-    --contrib-2: rgb(0, 109, 50);
-    --contrib-3: rgb(38, 166, 65);
-    --contrib-4: rgb(57, 211, 83);
-    --focus: rgb(88, 166, 255);
+    --theme: #202020;
+    --entry: #2a2827;
+    --primary: #ddc7a1;
+    --content: #d4be98;
+    --secondary: #a89984;
+    --tertiary: #504945;
+    --border: #3c3836;
+    --code-bg: #32302f;
+    --code-block-bg: #282828;
+    --code-fg: #ddc7a1;
+    --link: #7daea3;
+    --focus: #d8a657;
+    --selection-bg: #d8a657;
+    --selection-fg: #202020;
+    --contrib-0: #32302f;
+    --contrib-1: #494d35;
+    --contrib-2: #6b7246;
+    --contrib-3: #8e9857;
+    --contrib-4: #a9b665;
+}
+
+::selection {
+    color: var(--selection-fg);
+    background: var(--selection-bg);
+}
+
+.md-content a,
+.post-description a {
+    color: var(--link);
+}
+
+.md-content pre code {
+    color: var(--code-fg);
 }
 
 .visually-hidden {
@@ -466,19 +508,19 @@
 
 /* GitHub-style alerts */
 :root {
-    --alert-note: rgb(9, 105, 218);
-    --alert-tip: rgb(26, 127, 55);
-    --alert-important: rgb(130, 80, 223);
-    --alert-warning: rgb(154, 103, 0);
-    --alert-caution: rgb(209, 36, 47);
+    --alert-note: #076678;
+    --alert-tip: #66640d;
+    --alert-important: #8f3f71;
+    --alert-warning: #8f5a0a;
+    --alert-caution: #9d0006;
 }
 
 :root[data-theme="dark"] {
-    --alert-note: rgb(68, 147, 248);
-    --alert-tip: rgb(63, 185, 80);
-    --alert-important: rgb(171, 125, 248);
-    --alert-warning: rgb(210, 153, 34);
-    --alert-caution: rgb(248, 81, 73);
+    --alert-note: #7daea3;
+    --alert-tip: #a9b665;
+    --alert-important: #d3869b;
+    --alert-warning: #d8a657;
+    --alert-caution: #ea6962;
 }
 
 .md-content blockquote.alert {
