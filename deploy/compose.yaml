@@ -7,7 +7,8 @@
 # Stack environment variables (set in Portainer, not in this file):
 #   GIT_REPO           required  e.g. https://github.com/nulifyer/blog.git
 #                                private repo: https://<user>:<token>@host/owner/blog.git
-#   SITE_HOST          required  e.g. blog.swarm.nulteck.com (Traefik route and site URL)
+#   SITE_HOST          required  public hostname, e.g. nulteck.com (www.<host> redirects to it)
+#   INTERNAL_HOST      optional  LAN hostname that redirects to the public site, e.g. blog.swarm.nulteck.com
 #   BASE_URL           optional  default https://${SITE_HOST}/
 #   HUGO_GITHUB_TOKEN  optional  raises GitHub's API limit (60 -> 5,000 requests/hour); not needed
 #   GIT_BRANCH         optional  default main
@@ -64,14 +65,32 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik"
-      - "traefik.http.routers.blog-http.entrypoints=web"
-      - "traefik.http.routers.blog-http.rule=Host(`${SITE_HOST:?set SITE_HOST}`)"
-      - "traefik.http.routers.blog-http.middlewares=https-redirect"
-
-      - "traefik.http.routers.blog-https.entrypoints=websecure"
-      - "traefik.http.routers.blog-https.rule=Host(`${SITE_HOST:?set SITE_HOST}`)"
-      - "traefik.http.services.blog.loadbalancer.server.scheme=http"
       - "traefik.http.services.blog.loadbalancer.server.port=80"
+
+      # Public site on the external entrypoints (the abuse check is attached to them).
+      - "traefik.http.routers.blog-public.entrypoints=websecureEx"
+      - "traefik.http.routers.blog-public.rule=Host(`${SITE_HOST:?set SITE_HOST}`)"
+      - "traefik.http.routers.blog-public.service=blog"
+      - "traefik.http.routers.blog-public-http.entrypoints=webEx"
+      - "traefik.http.routers.blog-public-http.rule=Host(`${SITE_HOST:?set SITE_HOST}`) || Host(`www.${SITE_HOST:?set SITE_HOST}`)"
+      - "traefik.http.routers.blog-public-http.middlewares=https-redirect"
+      - "traefik.http.routers.blog-public-http.service=blog"
+
+      # www -> bare domain.
+      - "traefik.http.routers.blog-www.entrypoints=websecureEx"
+      - "traefik.http.routers.blog-www.rule=Host(`www.${SITE_HOST:?set SITE_HOST}`)"
+      - "traefik.http.routers.blog-www.middlewares=blog-to-site"
+      - "traefik.http.routers.blog-www.service=blog"
+
+      # Internal hostname (optional) -> public site, on the internal entrypoints.
+      - "traefik.http.routers.blog-internal.entrypoints=web,websecure"
+      - "traefik.http.routers.blog-internal.rule=Host(`${INTERNAL_HOST:-internal-host.invalid}`)"
+      - "traefik.http.routers.blog-internal.middlewares=blog-to-site"
+      - "traefik.http.routers.blog-internal.service=blog"
+
+      - "traefik.http.middlewares.blog-to-site.redirectregex.regex=^https?://[^/]+/?(.*)$$"
+      - "traefik.http.middlewares.blog-to-site.redirectregex.replacement=https://${SITE_HOST:?set SITE_HOST}/$${1}"
+      - "traefik.http.middlewares.blog-to-site.redirectregex.permanent=true"
     logging: *service-logging
 
 configs:
@@ -183,6 +202,7 @@ configs:
       add_header X-Content-Type-Options "nosniff" always;
       add_header Referrer-Policy "strict-origin-when-cross-origin" always;
       add_header X-Frame-Options "DENY" always;
+      add_header Strict-Transport-Security "max-age=31536000" always;
       add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;
       # Inline scripts/styles come from the theme; README images load from GitHub and badge hosts.
       add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'" always;

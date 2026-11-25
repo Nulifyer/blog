@@ -1,6 +1,6 @@
 # blog
 
-Source for my profile site and blog: a [Hugo](https://gohugo.io) site with its own theme,
+Source for my profile site and blog at https://nulteck.com: a [Hugo](https://gohugo.io) site with its own theme,
 [`themes/buffer`](themes/buffer/README.md) (editor-inspired, Gruvbox light and dark).
 
 ## How publishing works
@@ -76,7 +76,9 @@ podman run --rm -it -p 1313:1313 -v "$PWD:/project:z" ghcr.io/gohugoio/hugo:v0.1
 
 Then open http://localhost:1313.
 
-## Changing the domain
+## Domain
 
-Set `SITE_HOST` in the stack environment and redeploy. Links, the sitemap, feeds and
-link-preview cards all follow it.
+The stack serves `SITE_HOST` (now `nulteck.com`) on Traefik's external entrypoints, redirects
+`www.SITE_HOST` and the optional `INTERNAL_HOST` (`blog.swarm.nulteck.com`) to it, and sends HSTS.
+Links, the sitemap, feeds and link-preview cards follow `SITE_HOST`; change it in the stack
+environment and redeploy.
