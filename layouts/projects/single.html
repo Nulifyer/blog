@@ -16,8 +16,15 @@
       </div>
     </div>
   </header>
+  {{- /* The page title is the only h1: if the README has its own h1, shift its headings down one level (h5 first, so none shift twice). */}}
+  {{- $content := .Content }}
+  {{- if findRE `<h1[\s>]` $content 1 }}
+  {{- range seq 5 1 }}
+  {{- $content = replaceRE (printf `<(/?)h%d([\s>])` .) (printf `<${1}h%d${2}` (add . 1)) $content }}
+  {{- end }}
+  {{- end }}
   <div class="post-content md-content project-readme">
-    {{- partial "anchored_headings.html" .Content -}}
+    {{- partial "anchored_headings.html" $content -}}
   </div>
 </article>
 {{- end }}

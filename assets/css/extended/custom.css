@@ -454,3 +454,46 @@
     margin: 2px 1px;
     vertical-align: middle;
 }
+
+/* Wide tables scroll inside their own box instead of widening the page (as on GitHub).
+   Applies to posts and project READMEs. */
+.md-content table {
+    display: block;
+    width: max-content;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+/* GitHub-style alerts */
+:root {
+    --alert-note: rgb(9, 105, 218);
+    --alert-tip: rgb(26, 127, 55);
+    --alert-important: rgb(130, 80, 223);
+    --alert-warning: rgb(154, 103, 0);
+    --alert-caution: rgb(209, 36, 47);
+}
+
+:root[data-theme="dark"] {
+    --alert-note: rgb(68, 147, 248);
+    --alert-tip: rgb(63, 185, 80);
+    --alert-important: rgb(171, 125, 248);
+    --alert-warning: rgb(210, 153, 34);
+    --alert-caution: rgb(248, 81, 73);
+}
+
+.md-content blockquote.alert {
+    --alert: var(--alert-note);
+    padding: 2px 16px;
+    border-inline-start: 4px solid var(--alert);
+}
+
+.md-content blockquote.alert-tip { --alert: var(--alert-tip); }
+.md-content blockquote.alert-important { --alert: var(--alert-important); }
+.md-content blockquote.alert-warning { --alert: var(--alert-warning); }
+.md-content blockquote.alert-caution { --alert: var(--alert-caution); }
+
+.md-content .alert .alert-title {
+    margin-bottom: 4px;
+    font-weight: 600;
+    color: var(--alert);
+}
