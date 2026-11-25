@@ -1,0 +1,19 @@
+{{- /* Word-wrap .text to .width characters per line, at most .lines lines (ellipsis when cut). */ -}}
+{{- $lines := slice -}}
+{{- $cur := "" -}}
+{{- range split .text " " -}}
+  {{- if and $cur (gt (add (len $cur) (len .) 1) $.width) -}}
+    {{- $lines = $lines | append $cur -}}
+    {{- $cur = . -}}
+  {{- else -}}
+    {{- $cur = trim (printf "%s %s" $cur .) " " -}}
+  {{- end -}}
+{{- end -}}
+{{- with $cur }}{{ $lines = $lines | append . }}{{ end -}}
+{{- if gt (len $lines) .lines -}}
+  {{- $keep := first .lines $lines -}}
+  {{- $last := printf "%s…" (index $keep (sub .lines 1)) -}}
+  {{- $lines = (first (sub .lines 1) $keep) | append $last -}}
+{{- end -}}
+{{- $out := delimit $lines "\n" -}}
+{{- return $out -}}

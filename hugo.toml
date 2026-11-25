@@ -1,6 +1,7 @@
 # Production URL comes from the workflow's --baseURL; this value is for local previews.
 baseURL = "https://blog.swarm.nulteck.com/"
 title = "nulifyer"
+locale = "en-US"
 theme = "PaperMod"
 enableRobotsTXT = true
 enableGitInfo = false
@@ -23,7 +24,9 @@ disableKinds = ["taxonomy", "term"]
 
 [params]
   env = "production"
-  description = "Posts and projects by nulifyer"
+  description = "Write-ups on the things I build, and the projects they're about."
+  author = "nulifyer"
+  ShowFullTextinRSS = true
   mainSections = ["posts"]
   defaultTheme = "auto"
   ShowBreadCrumbs = true
@@ -34,6 +37,13 @@ disableKinds = ["taxonomy", "term"]
   TocOpen = false
 
   intro = "Write-ups on the things I build, and the projects they're about."
+
+  [params.assets]
+    theme_color = "#202020"
+
+  [params.schema]
+    publisherType = "Person"
+    sameAs = ["https://github.com/nulifyer"]
 
   [params.github]
     user = "nulifyer"

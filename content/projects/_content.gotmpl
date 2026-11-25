@@ -114,6 +114,7 @@
     "kind" "page"
     "path" (lower .name)
     "title" .name
+    "description" (.description | default "")
     "dates" (dict "date" (time.AsTime .created_at) "lastmod" (time.AsTime .pushed_at))
     "params" (dict
       "description" (.description | default "")
@@ -127,6 +128,7 @@
       "topics" (.topics | default slice)
       "icon_url" $icon
       "pinned_rank" $rank
+      "hiddenInRss" true
     )
     "content" (dict "mediaType" "text/markdown" "value" $readme)
   ) -}}

@@ -1,0 +1,27 @@
+{{- /* 1200x630 link-preview card: avatar on Gruvbox dark, page title, kind and host. Returns an image resource. */ -}}
+{{- $base := resources.Get "og/base.png" -}}
+{{- $bold := resources.Get "fonts/FiraSans-Bold.ttf" -}}
+{{- $regular := resources.Get "fonts/FiraSans-Regular.ttf" -}}
+{{- $x := 370 -}}
+{{- $title := .Title | default site.Title -}}
+{{- $kind := "" -}}
+{{- if .IsHome -}}
+  {{- $title = site.Title -}}
+{{- else if eq .Section "projects" -}}
+  {{- $kind = cond .IsPage "Project" "" -}}
+{{- else if eq .Section "posts" -}}
+  {{- $kind = cond .IsPage "Post" "" -}}
+{{- end -}}
+{{- $desc := .Description | default site.Params.description | plainify | htmlUnescape -}}
+{{- $size := cond (gt (len $title) 20) 56 72 -}}
+{{- $title = partial "og-wrap.html" (dict "text" $title "width" (cond (eq $size 72) 20 26) "lines" 2) -}}
+{{- $desc = partial "og-wrap.html" (dict "text" $desc "width" 44 "lines" 2) -}}
+{{- $filters := slice -}}
+{{- with $kind -}}
+  {{- $filters = $filters | append (images.Text . (dict "font" $regular "size" 30 "color" "#d8a657" "x" $x "y" 150)) -}}
+{{- end -}}
+{{- $filters = $filters | append (images.Text $title (dict "font" $bold "size" $size "color" "#ddc7a1" "x" $x "y" 200 "linespacing" 6)) -}}
+{{- $filters = $filters | append (images.Text $desc (dict "font" $regular "size" 30 "color" "#a89984" "x" $x "y" 390 "linespacing" 8)) -}}
+{{- $filters = $filters | append (images.Text (urls.Parse site.Home.Permalink).Host (dict "font" $regular "size" 26 "color" "#a89984" "x" $x "y" 548)) -}}
+{{- $card := $base | images.Filter $filters -}}
+{{- return $card -}}
