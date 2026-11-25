@@ -8,7 +8,6 @@
 #   GIT_REPO           required  e.g. https://github.com/nulifyer/blog.git
 #                                private repo: https://<user>:<token>@host/owner/blog.git
 #   SITE_HOST          required  public hostname, e.g. nulteck.com (www.<host> redirects to it)
-#   INTERNAL_HOST      optional  LAN hostname that redirects to the public site, e.g. blog.swarm.nulteck.com
 #   BASE_URL           optional  default https://${SITE_HOST}/
 #   HUGO_GITHUB_TOKEN  optional  raises GitHub's API limit (60 -> 5,000 requests/hour); not needed
 #   GIT_BRANCH         optional  default main
@@ -81,12 +80,6 @@ services:
       - "traefik.http.routers.blog-www.rule=Host(`www.${SITE_HOST:?set SITE_HOST}`)"
       - "traefik.http.routers.blog-www.middlewares=blog-to-site"
       - "traefik.http.routers.blog-www.service=blog"
-
-      # Internal hostname (optional) -> public site, on the internal entrypoints.
-      - "traefik.http.routers.blog-internal.entrypoints=web,websecure"
-      - "traefik.http.routers.blog-internal.rule=Host(`${INTERNAL_HOST:-internal-host.invalid}`)"
-      - "traefik.http.routers.blog-internal.middlewares=blog-to-site"
-      - "traefik.http.routers.blog-internal.service=blog"
 
       - "traefik.http.middlewares.blog-to-site.redirectregex.regex=^https?://[^/]+/?(.*)$$"
       - "traefik.http.middlewares.blog-to-site.redirectregex.replacement=https://${SITE_HOST:?set SITE_HOST}/$${1}"

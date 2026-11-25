@@ -79,6 +79,6 @@ Then open http://localhost:1313.
 ## Domain
 
 The stack serves `SITE_HOST` (now `nulteck.com`) on Traefik's external entrypoints, redirects
-`www.SITE_HOST` and the optional `INTERNAL_HOST` (`blog.swarm.nulteck.com`) to it, and sends HSTS.
+`www.SITE_HOST` to it, and sends HSTS.
 Links, the sitemap, feeds and link-preview cards follow `SITE_HOST`; change it in the stack
 environment and redeploy.
