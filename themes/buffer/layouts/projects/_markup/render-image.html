@@ -1,7 +1,32 @@
+{{- /* README images: resolve paths against the repo, then fetch, resize and self-host raster images
+       (WebP, two widths, explicit size). Anything that can't be processed is linked as-is. */ -}}
 {{- $src := .Destination -}}
 {{- $u := urls.Parse $src -}}
 {{- if and .Page.Params.full_name (not $u.IsAbs) -}}
   {{- $src = printf "https://raw.githubusercontent.com/%s/%s/%s" .Page.Params.full_name .Page.Params.default_branch (strings.TrimLeft "./" $src) -}}
 {{- end -}}
-<img src="{{ $src | safeURL }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy">
+{{- $alt := .PlainText -}}
+{{- $eager := eq .Ordinal 0 -}}
+{{- $out := dict -}}
+{{- if hasPrefix $src "https://" -}}
+  {{- with try (resources.GetRemote $src) -}}
+    {{- with .Err -}}{{- warnf "README image %s: %s" $src . -}}
+    {{- else with .Value -}}
+      {{- if in (slice "png" "jpeg" "webp") .MediaType.SubType -}}
+        {{- $large := . -}}{{- $small := . -}}
+        {{- if gt .Width 1400 }}{{ $large = .Resize "1400x webp" }}{{ else }}{{ $large = .Process "webp" }}{{ end -}}
+        {{- if gt .Width 700 }}{{ $small = .Resize "700x webp" }}{{ else }}{{ $small = $large }}{{ end -}}
+        {{- $out = dict "src" $large.RelPermalink "w" $large.Width "h" $large.Height
+            "srcset" (printf "%s %dw, %s %dw" $small.RelPermalink $small.Width $large.RelPermalink $large.Width) -}}
+      {{- else -}}
+        {{- $out = dict "src" .RelPermalink -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- with $out.srcset -}}
+<img src="{{ $out.src }}" srcset="{{ . }}" sizes="(max-width: 760px) calc(100vw - 32px), 700px" width="{{ $out.w }}" height="{{ $out.h }}" alt="{{ $alt }}"{{ with $.Title }} title="{{ . }}"{{ end }}{{ if $eager }} fetchpriority="high"{{ else }} loading="lazy"{{ end }} decoding="async">
+{{- else -}}
+<img src="{{ $out.src | default $src | safeURL }}" alt="{{ $alt }}"{{ with $.Title }} title="{{ . }}"{{ end }} loading="lazy" decoding="async">
+{{- end -}}
 {{- /**/ -}}
