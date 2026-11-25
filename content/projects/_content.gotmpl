@@ -1,37 +1,30 @@
 {{- /*
   Content adapter: one page per repo you own and have pinned on your GitHub profile or starred.
   Each page uses the repo's README as its body. Runs at build time.
-  Pinned repos need HUGO_GITHUB_TOKEN (GitHub's GraphQL API requires a token); the workflow passes
-  one. Without a token, only starred repos are listed.
+  No token needed. HUGO_GITHUB_TOKEN (optional) raises GitHub's API limit from 60 to 5,000 requests
+  an hour; a build makes about eight.
 */ -}}
 {{- $user := site.Params.github.user -}}
 {{- $cfg := hugo.Data.projects | default dict -}}
 {{- $hide := $cfg.hide | default slice -}}
 
-{{- $token := os.Getenv "HUGO_GITHUB_TOKEN" -}}
 {{- $headers := dict "Accept" "application/vnd.github+json" "X-GitHub-Api-Version" "2022-11-28" -}}
-{{- with $token -}}
+{{- with os.Getenv "HUGO_GITHUB_TOKEN" -}}
   {{- $headers = merge $headers (dict "Authorization" (printf "Bearer %s" .)) -}}
 {{- end -}}
 
-{{- /* Pinned repos, in profile order. */ -}}
+{{- /* Pinned repos, in profile order, read from the public profile page (no token needed). */ -}}
 {{- $pinned := slice -}}
-{{- if $token -}}
-  {{- $query := printf `{ user(login: %q) { pinnedItems(first: 6, types: REPOSITORY) { nodes { ... on Repository { name owner { login } } } } } }` $user -}}
-  {{- $opts := dict "method" "post" "body" (dict "query" $query | jsonify) "headers" (merge $headers (dict "Content-Type" "application/json")) -}}
-  {{- with try (resources.GetRemote "https://api.github.com/graphql" $opts) -}}
-    {{- with .Err -}}
-      {{- errorf "projects: could not read pinned repos: %s" . -}}
-    {{- else with .Value -}}
-      {{- $data := . | transform.Unmarshal -}}
-      {{- with $data.errors -}}{{- errorf "projects: pinned repos query failed: %v" . -}}{{- end -}}
-      {{- range $data.data.user.pinnedItems.nodes -}}
-        {{- if eq (lower .owner.login) (lower $user) -}}{{- $pinned = $pinned | append .name -}}{{- end -}}
-      {{- end -}}
+{{- $profileURL := printf "https://github.com/%s" $user -}}
+{{- with try (resources.GetRemote $profileURL (dict "headers" (dict "User-Agent" "blog-builder (Hugo)"))) -}}
+  {{- with .Err -}}
+    {{- warnf "projects: could not read pinned repos from %s: %s" $profileURL . -}}
+  {{- else with .Value -}}
+    {{- range findRESubmatch (printf `(?i)href="/%s/([^"/]+)"[^>]*>\s*<span class="repo"` $user) .Content -}}
+      {{- $pinned = $pinned | append (index . 1) -}}
     {{- end -}}
+    {{- if not $pinned -}}{{- warnf "projects: no pinned repos found on %s; GitHub may have changed the page" $profileURL -}}{{- end -}}
   {{- end -}}
-{{- else -}}
-  {{- warnf "projects: HUGO_GITHUB_TOKEN is not set, so pinned repos are skipped" -}}
 {{- end -}}
 
 {{- /* Starred repos that you own (stars on other people's repos are ignored). */ -}}

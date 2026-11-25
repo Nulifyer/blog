@@ -1,37 +1,58 @@
-{{- /* GitHub contribution calendar, fetched at build time (needs HUGO_GITHUB_TOKEN). */ -}}
+{{- /* GitHub contribution calendar, read at build time from the public calendar page (no token needed). */ -}}
 {{- $user := site.Params.github.user -}}
-{{- $token := os.Getenv "HUGO_GITHUB_TOKEN" -}}
-{{- $cal := dict -}}
-{{- if $token -}}
-  {{- $query := printf `{ user(login: %q) { contributionsCollection { contributionCalendar { totalContributions weeks { contributionDays { date contributionCount contributionLevel } } } } } }` $user -}}
-  {{- $opts := dict "method" "post" "body" (dict "query" $query | jsonify) "headers" (dict "Authorization" (printf "Bearer %s" $token) "Content-Type" "application/json") -}}
-  {{- with try (resources.GetRemote "https://api.github.com/graphql" $opts) -}}
-    {{- with .Err -}}{{- warnf "contributions: %s" . -}}
-    {{- else with .Value -}}
-      {{- $data := . | transform.Unmarshal -}}
-      {{- with $data.errors -}}{{- warnf "contributions: %v" . -}}
-      {{- else -}}{{- $cal = $data.data.user.contributionsCollection.contributionCalendar -}}{{- end -}}
-    {{- end -}}
-  {{- end -}}
-{{- else -}}
-  {{- warnf "contributions: HUGO_GITHUB_TOKEN is not set, so the activity graph is skipped" -}}
+{{- $url := printf "https://github.com/users/%s/contributions" $user -}}
+{{- $html := "" -}}
+{{- with try (resources.GetRemote $url (dict "headers" (dict "User-Agent" "blog-builder (Hugo)"))) -}}
+  {{- with .Err -}}{{- warnf "contributions: could not read %s: %s" $url . -}}
+  {{- else with .Value -}}{{- $html = .Content -}}{{- end -}}
 {{- end -}}
 
-{{- with $cal.weeks -}}
-{{- $weeks := . -}}
+{{- /* Day counts come from the tooltips: for="contribution-day-component-ROW-COL" ... "3 contributions on ..." */ -}}
+{{- $counts := dict -}}
+{{- range findRESubmatch `for="(contribution-day-component-\d+-\d+)"[^>]*>\s*(No|\d+) contributions?` $html -}}
+  {{- $n := 0 }}{{ if ne (index . 2) "No" }}{{ $n = int (index . 2) }}{{ end -}}
+  {{- $counts = merge $counts (dict (index . 1) $n) -}}
+{{- end -}}
+
+{{- /* Day cells: id gives ROW (weekday, 0 = Sunday) and COL (week); data-level is GitHub's 0-4 shade. */ -}}
+{{- $cells := slice -}}
+{{- $weeks := 0 -}}
+{{- range findRE `<td[^>]*class="ContributionCalendar-day"[^>]*>` $html -}}
+  {{- $id := index (findRESubmatch `id="(contribution-day-component-(\d+)-(\d+))"` . 1) 0 -}}
+  {{- $date := index (index (findRESubmatch `data-date="([\d-]+)"` . 1) 0) 1 -}}
+  {{- $lvl := index (index (findRESubmatch `data-level="(\d)"` . 1) 0) 1 -}}
+  {{- $col := int (index $id 3) -}}
+  {{- if ge $col $weeks }}{{ $weeks = add $col 1 }}{{ end -}}
+  {{- $cells = $cells | append (dict "row" (int (index $id 2)) "col" $col "date" (time.AsTime $date) "level" $lvl "count" (index $counts (index $id 1) | default 0)) -}}
+{{- end -}}
+
+{{- $total := 0 -}}
+{{- with findRESubmatch `([\d,]+)\s+contributions?\s+in the last year` $html 1 -}}
+  {{- $total = int (replace (index (index . 0) 1) "," "") -}}
+{{- else -}}
+  {{- range $cells }}{{ $total = add $total .count }}{{ end -}}
+{{- end -}}
+
+{{- if and $html (not $cells) -}}
+  {{- warnf "contributions: no days found on %s; GitHub may have changed the page" $url -}}
+{{- end -}}
+
+{{- with $cells -}}
 {{- $cell := 10 -}}{{- $step := 12 -}}{{- $left := 28 -}}{{- $top := 18 -}}
-{{- $width := add $left (mul (len $weeks) $step) -}}
+{{- $width := add $left (mul $weeks $step) -}}
 {{- $height := add $top (mul 7 $step) -}}
-{{- $row := dict "Sun" 0 "Mon" 1 "Tue" 2 "Wed" 3 "Thu" 4 "Fri" 5 "Sat" 6 -}}
-{{- $level := dict "NONE" 0 "FIRST_QUARTILE" 1 "SECOND_QUARTILE" 2 "THIRD_QUARTILE" 3 "FOURTH_QUARTILE" 4 -}}
-{{- $total := $cal.totalContributions -}}
 
 {{- /* Month labels: at the first week of each month, skipping one too close to the next. */ -}}
+{{- $firstOfWeek := dict -}}
+{{- range sort $cells "date" -}}
+  {{- $k := string .col -}}
+  {{- if not (index $firstOfWeek $k) }}{{ $firstOfWeek = merge $firstOfWeek (dict $k (.date.Format "Jan")) }}{{ end -}}
+{{- end -}}
 {{- $labels := slice -}}
 {{- $prev := "" -}}
-{{- range $i, $w := $weeks -}}
-  {{- $m := (time.AsTime (index $w.contributionDays 0).date).Format "Jan" -}}
-  {{- if ne $m $prev -}}{{- $labels = $labels | append (dict "i" $i "m" $m) -}}{{- end -}}
+{{- range $i := seq 0 (sub $weeks 1) -}}
+  {{- $m := index $firstOfWeek (string $i) -}}
+  {{- if and $m (ne $m $prev) }}{{ $labels = $labels | append (dict "i" $i "m" $m) }}{{ end -}}
   {{- $prev = $m -}}
 {{- end -}}
 
@@ -53,12 +74,9 @@
         <text x="0" y="{{ add $top (mul 1 $step) 9 }}" class="contrib-label">Mon</text>
         <text x="0" y="{{ add $top (mul 3 $step) 9 }}" class="contrib-label">Wed</text>
         <text x="0" y="{{ add $top (mul 5 $step) 9 }}" class="contrib-label">Fri</text>
-        {{- range $i, $w := $weeks }}
-        {{- range $w.contributionDays }}
-        {{- $t := time.AsTime .date }}
-        {{- $c := .contributionCount }}
-        <rect x="{{ add $left (mul $i $step) }}" y="{{ add $top (mul (index $row ($t.Format "Mon")) $step) }}" width="{{ $cell }}" height="{{ $cell }}" rx="2" class="c{{ index $level .contributionLevel }}"><title>{{ if eq $c 0 }}No contributions{{ else }}{{ $c }} {{ cond (eq $c 1) "contribution" "contributions" }}{{ end }} on {{ $t | time.Format ":date_medium" }}</title></rect>
-        {{- end }}
+        {{- range $cells }}
+        {{- $c := .count }}
+        <rect x="{{ add $left (mul .col $step) }}" y="{{ add $top (mul .row $step) }}" width="{{ $cell }}" height="{{ $cell }}" rx="2" class="c{{ .level }}"><title>{{ if eq $c 0 }}No contributions{{ else }}{{ $c }} {{ cond (eq $c 1) "contribution" "contributions" }}{{ end }} on {{ .date | time.Format ":date_medium" }}</title></rect>
         {{- end }}
       </svg>
     </div>

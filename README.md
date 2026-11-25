@@ -1,18 +1,21 @@
 # blog
 
-Source for https://blog.swarm.nulteck.com: a [Hugo](https://gohugo.io) site with the
+Source for my profile site and blog: a [Hugo](https://gohugo.io) site with the
 [PaperMod](https://github.com/adityatelange/hugo-PaperMod) theme.
 
 ## How publishing works
 
-1. Push to `main`.
-2. [`build.yml`](.github/workflows/build.yml) builds the site and force-pushes the HTML to the `site` branch.
-   It also runs daily, so the Projects page picks up new repos and README changes.
-3. The homelab stack ([`deploy/compose.yaml`](deploy/compose.yaml)) runs git-sync, which checks
-   the `site` branch every 60 seconds, and nginx, which serves it behind Traefik.
+The site builds itself; there is no CI. [`deploy/compose.yaml`](deploy/compose.yaml) is a
+self-contained Docker Compose stack:
 
-A push is usually live within two or three minutes. If a build fails, the `site` branch
-isn't updated and the current site keeps serving.
+- **builder** (official Hugo image) clones this repo, checks the branch every minute and
+  rebuilds when it changes. It also rebuilds every hour so GitHub stars, pins and the
+  contribution graph stay current. A failed build is logged and the previous build keeps serving.
+- **web** (nginx) serves the latest successful build behind Traefik.
+
+Push to `main` and the change is live within a minute or two. The stack only needs a git URL,
+so it works the same with GitHub, Forgejo or any other host. Stack settings
+(`GIT_REPO`, `SITE_HOST`, and optional ones) are documented at the top of the compose file.
 
 ## Writing a post
 
@@ -38,11 +41,18 @@ Post body in Markdown.
 Posts with `draft: true` aren't published. A post dated in the future appears once a
 build runs after that date.
 
+## GitHub data
+
+The Projects page and the contribution graph read public GitHub data at build time, with no
+token: the public API for repos, stars and READMEs, and the public profile and contributions
+pages for pinned repos and the graph. GitHub allows 60 unauthenticated API requests an hour;
+a build uses about eight, and responses are cached for ten minutes.
+
 ## Projects page
 
 `content/projects/_content.gotmpl` creates one page per repo you own that is pinned on your
 GitHub profile or starred by you, using the repo's README as the page body. Pinned repos come first. Stars on other people's repos are ignored. To add or remove a
-project, pin, unpin, star or unstar it on GitHub; the next build (at least daily) picks it up.
+project, pin, unpin, star or unstar it on GitHub; the hourly rebuild picks it up.
 To keep a pinned or starred repo off the site, list it under `hide` in
 [`data/projects.yaml`](data/projects.yaml).
 
@@ -52,7 +62,7 @@ For a repo without one, set `icons` in the same file; otherwise the card shows t
 ## Home page
 
 The home page shows the GitHub contribution graph for the last year, the three newest posts and
-the pinned projects. The graph is fetched at build time, so it updates with the daily build.
+the pinned projects.
 
 ## Local preview
 
@@ -62,10 +72,9 @@ podman run --rm -it -p 1313:1313 -v "$PWD:/project:z" -e HUGO_GITHUB_TOKEN="$(gh
   ghcr.io/gohugoio/hugo:v0.170.1 server --bind 0.0.0.0
 ```
 
-Then open http://localhost:1313. The token is optional; without it, GitHub's
-unauthenticated limit of 60 requests an hour covers about one build.
+Then open http://localhost:1313. The token is optional.
 
 ## Changing the domain
 
-Set the repository variable `BASE_URL` (Settings → Secrets and variables → Actions → Variables)
-and add a matching Traefik router to the stack.
+Set `SITE_HOST` in the stack environment and redeploy. Links, the sitemap, feeds and
+link-preview cards all follow it.

@@ -539,3 +539,21 @@
     font-weight: 600;
     color: var(--alert);
 }
+
+/* Post cards: no lift on hover/press (PaperMod moves them); a border change marks hover instead. */
+.post-entry,
+.post-entry:hover,
+.post-entry:focus-within,
+.post-entry:active {
+    transform: none;
+    transition: none;
+}
+
+.post-entry:hover {
+    border-color: var(--tertiary);
+}
+
+.post-entry:focus-within {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+}
