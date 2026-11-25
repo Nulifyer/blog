@@ -1,9 +1,6 @@
-# The Projects page lists every public, non-fork, non-archived repo automatically.
-# Pin repos to the top, in this order:
-featured:
-  - guget
-  - sqlgo
-# Leave these repos off the site:
-hide:
-  - blog
-  - nulifyer
+# The Projects page lists repos you own that are pinned on your GitHub profile or starred by you.
+# Pinned repos come first, in profile order. Change pins or stars on GitHub; the site picks it up
+# on the next build (at least daily).
+#
+# Leave these repos off the site even if pinned or starred:
+hide: []

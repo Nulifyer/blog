@@ -34,7 +34,7 @@ enableGitInfo = false
 
   [params.homeInfoParams]
     Title = "Hi, I'm nulifyer"
-    Content = "Write-ups on the things I build. The [projects](/projects/) page is generated from my public GitHub repos."
+    Content = "Write-ups on the things I build. The [projects](/projects/) page lists the GitHub repos I've pinned or starred."
 
   [[params.socialIcons]]
     name = "github"

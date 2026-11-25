@@ -41,9 +41,12 @@ build runs after that date.
 
 ## Projects page
 
-`content/projects/_content.gotmpl` creates one page per public, non-fork, non-archived
-repo on GitHub, using the repo's README as the page body and its topics as tags.
-Edit [`data/projects.yaml`](data/projects.yaml) to pin repos to the top or hide them.
+`content/projects/_content.gotmpl` creates one page per repo you own that is pinned on your
+GitHub profile or starred by you, using the repo's README as the page body and its topics as
+tags. Pinned repos come first. Stars on other people's repos are ignored. To add or remove a
+project, pin, unpin, star or unstar it on GitHub; the next build (at least daily) picks it up.
+To keep a pinned or starred repo off the site, list it under `hide` in
+[`data/projects.yaml`](data/projects.yaml).
 
 ## Local preview
 

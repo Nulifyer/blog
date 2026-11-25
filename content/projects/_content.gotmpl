@@ -1,16 +1,55 @@
 {{- /*
-  Content adapter: one page per public GitHub repo, with the repo's README as the page body.
-  Runs at build time. HUGO_GITHUB_TOKEN (optional) raises the API rate limit.
+  Content adapter: one page per repo you own and have pinned on your GitHub profile or starred.
+  Each page uses the repo's README as its body. Runs at build time.
+  Pinned repos need HUGO_GITHUB_TOKEN (GitHub's GraphQL API requires a token); the workflow passes
+  one. Without a token, only starred repos are listed.
 */ -}}
 {{- $user := site.Params.github.user -}}
 {{- $cfg := hugo.Data.projects | default dict -}}
 {{- $hide := $cfg.hide | default slice -}}
-{{- $featured := $cfg.featured | default slice -}}
 
+{{- $token := os.Getenv "HUGO_GITHUB_TOKEN" -}}
 {{- $headers := dict "Accept" "application/vnd.github+json" "X-GitHub-Api-Version" "2022-11-28" -}}
-{{- with os.Getenv "HUGO_GITHUB_TOKEN" -}}
+{{- with $token -}}
   {{- $headers = merge $headers (dict "Authorization" (printf "Bearer %s" .)) -}}
 {{- end -}}
+
+{{- /* Pinned repos, in profile order. */ -}}
+{{- $pinned := slice -}}
+{{- if $token -}}
+  {{- $query := printf `{ user(login: %q) { pinnedItems(first: 6, types: REPOSITORY) { nodes { ... on Repository { name owner { login } } } } } }` $user -}}
+  {{- $opts := dict "method" "post" "body" (dict "query" $query | jsonify) "headers" (merge $headers (dict "Content-Type" "application/json")) -}}
+  {{- with try (resources.GetRemote "https://api.github.com/graphql" $opts) -}}
+    {{- with .Err -}}
+      {{- errorf "projects: could not read pinned repos: %s" . -}}
+    {{- else with .Value -}}
+      {{- $data := . | transform.Unmarshal -}}
+      {{- with $data.errors -}}{{- errorf "projects: pinned repos query failed: %v" . -}}{{- end -}}
+      {{- range $data.data.user.pinnedItems.nodes -}}
+        {{- if eq (lower .owner.login) (lower $user) -}}{{- $pinned = $pinned | append .name -}}{{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- else -}}
+  {{- warnf "projects: HUGO_GITHUB_TOKEN is not set, so pinned repos are skipped" -}}
+{{- end -}}
+
+{{- /* Starred repos that you own (stars on other people's repos are ignored). */ -}}
+{{- $starred := slice -}}
+{{- range $page := seq 10 -}}
+  {{- $url := printf "https://api.github.com/users/%s/starred?per_page=100&page=%d" $user $page -}}
+  {{- $batch := slice -}}
+  {{- with try (resources.GetRemote $url (dict "headers" $headers)) -}}
+    {{- with .Err -}}{{- errorf "projects: could not list starred repos: %s" . -}}
+    {{- else with .Value -}}{{- $batch = . | transform.Unmarshal -}}{{- end -}}
+  {{- end -}}
+  {{- range $batch -}}
+    {{- if eq (lower .owner.login) (lower $user) -}}{{- $starred = $starred | append .name -}}{{- end -}}
+  {{- end -}}
+  {{- if lt (len $batch) 100 -}}{{- break -}}{{- end -}}
+{{- end -}}
+
+{{- $selected := union $pinned $starred -}}
 
 {{- $listURL := printf "https://api.github.com/users/%s/repos?type=owner&per_page=100&sort=pushed" $user -}}
 {{- $repos := slice -}}
@@ -23,7 +62,7 @@
 {{- end -}}
 
 {{- range $repos -}}
-  {{- if or .fork .archived .private (in $hide .name) -}}{{- continue -}}{{- end -}}
+  {{- if or .private (not (in $selected .name)) (in $hide .name) -}}{{- continue -}}{{- end -}}
 
   {{- $repo := . -}}
   {{- $raw := printf "https://raw.githubusercontent.com/%s/%s/" .full_name .default_branch -}}
@@ -46,7 +85,7 @@
   {{- end -}}
 
   {{- $rank := 0 -}}
-  {{- range $i, $name := $featured -}}
+  {{- range $i, $name := $pinned -}}
     {{- if eq $name $repo.name -}}{{- $rank = add $i 1 -}}{{- end -}}
   {{- end -}}
 
@@ -63,6 +102,7 @@
       "homepage" (.homepage | default "")
       "language" (.language | default "")
       "stars" .stargazers_count
+      "fork" .fork
       "tags" (.topics | default slice)
       "featured_rank" $rank
     )

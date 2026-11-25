@@ -12,4 +12,4 @@ This site is a folder of Markdown files in a GitHub repository. Publishing a pos
 3. In my homelab, a [git-sync](https://github.com/kubernetes/git-sync) container checks that branch every minute and swaps in the new version.
 4. nginx serves the files, and Traefik handles the domain and HTTPS.
 
-The [projects](/projects/) page isn't written by hand. Each build reads my public GitHub repositories and turns every README into a page. The workflow also runs once a day, so new repos and stars show up without a post.
+The [projects](/projects/) page isn't written by hand. Each build reads the repos I've pinned or starred on GitHub and turns their READMEs into pages. The workflow also runs once a day, so pinning or starring a repo is enough to add it.
